@@ -1,0 +1,135 @@
+{
+  "generatedAt": "2026-01-11T04:36:17+00:00",
+  "modelId": "efficientnet",
+  "timeTaken": "23m 51s",
+  "history": [
+    {
+      "epoch": 1,
+      "trainLoss": 1.4502,
+      "valLoss": 1.3668,
+      "trainAcc": 0.8039000000000001,
+      "valAcc": 0.8199,
+      "lr": 0.0009972883382072953
+    },
+    {
+      "epoch": 2,
+      "trainLoss": 1.2249,
+      "valLoss": 1.3106,
+      "trainAcc": 0.8614,
+      "valAcc": 0.8382,
+      "lr": 0.0009891830623632338
+    },
+    {
+      "epoch": 3,
+      "trainLoss": 1.2047,
+      "valLoss": 1.3112,
+      "trainAcc": 0.8690000000000001,
+      "valAcc": 0.8371,
+      "lr": 0.0009757729755661011
+    },
+    {
+      "epoch": 4,
+      "trainLoss": 1.1972,
+      "valLoss": 1.297,
+      "trainAcc": 0.8709,
+      "valAcc": 0.8423,
+      "lr": 0.0009572050015330874
+    },
+    {
+      "epoch": 5,
+      "trainLoss": 1.1904,
+      "valLoss": 1.3055,
+      "trainAcc": 0.8734000000000001,
+      "valAcc": 0.8345,
+      "lr": 0.0009336825748732973
+    },
+    {
+      "epoch": 6,
+      "trainLoss": 1.1854,
+      "valLoss": 1.2873,
+      "trainAcc": 0.8740000000000001,
+      "valAcc": 0.8423999999999999,
+      "lr": 0.0009054634122155991
+    },
+    {
+      "epoch": 7,
+      "trainLoss": 1.1853,
+      "valLoss": 1.2751,
+      "trainAcc": 0.8731,
+      "valAcc": 0.8443999999999999,
+      "lr": 0.0008728566886113102
+    },
+    {
+      "epoch": 8,
+      "trainLoss": 1.1831,
+      "valLoss": 1.2525,
+      "trainAcc": 0.8752,
+      "valAcc": 0.8539,
+      "lr": 0.0008362196501476349
+    },
+    {
+      "epoch": 9,
+      "trainLoss": 1.1828,
+      "valLoss": 1.275,
+      "trainAcc": 0.8762000000000001,
+      "valAcc": 0.8467,
+      "lr": 0.0007959536998847742
+    },
+    {
+      "epoch": 10,
+      "trainLoss": 1.1834,
+      "valLoss": 1.2784,
+      "trainAcc": 0.8739,
+      "valAcc": 0.8443999999999999,
+      "lr": 0.0007525
+    },
+    {
+      "epoch": 11,
+      "trainLoss": 1.1763,
+      "valLoss": 1.258,
+      "trainAcc": 0.8764,
+      "valAcc": 0.8527,
+      "lr": 0.0007063346383225212
+    },
+    {
+      "epoch": 12,
+      "trainLoss": 1.1752,
+      "valLoss": 1.2937,
+      "trainAcc": 0.8785,
+      "valAcc": 0.8436,
+      "lr": 0.000657963412215599
+    },
+    {
+      "epoch": 13,
+      "trainLoss": 1.1746,
+      "valLoss": 1.2682,
+      "trainAcc": 0.8776,
+      "valAcc": 0.8481000000000001,
+      "lr": 0.0006079162869547909
+    }
+  ],
+  "hyperparameters": {
+    "model": "EfficientNet-B0",
+    "optimizer": "AdamW",
+    "learningRate": 0.001,
+    "batchSize": 64,
+    "epochs": 30,
+    "imageSize": "224x224",
+    "dropout": 0.2,
+    "l2Regularization": 0.0001,
+    "augmentation": [
+      "RandomResizedCrop(scale=0.6..1.0, ratio=0.75..1.3333)",
+      "RandomHorizontalFlip(p=0.5)",
+      "RandAugment(num_ops=2, magnitude=9) [if available]",
+      "ColorJitter(brightness=0.4, contrast=0.4, saturation=0.25, hue=0.02) (p=0.8)",
+      "GaussianBlur(kernel_size=3, sigma=0.1..2.0) (p=0.3)",
+      "RandomPerspective(distortion_scale=0.25, p=0.2)",
+      "Normalize(ImageNet mean/std)",
+      "RandomErasing(p=0.25, scale=0.02..0.15, ratio=0.3..3.3)"
+    ],
+    "labelSmoothing": 0.1,
+    "scheduler": "CosineAnnealingLR(T_max=epochs, eta_min=1e-5)",
+    "notes": "Train classifier only; optional AdaBN + TTA flip in validation."
+  }
+}
+

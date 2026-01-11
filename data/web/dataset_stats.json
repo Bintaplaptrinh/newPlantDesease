@@ -1,0 +1,104 @@
+{
+  "generatedAt": "2026-01-11T03:40:32+00:00",
+  "totalImages": 87867,
+  "trainImages": 70295,
+  "validationImages": 17572,
+  "testImages": 0,
+  "numClasses": 38,
+  "excludeOldInjectionClasses": [
+    "Apple___Black_rot",
+    "Cherry_(including_sour)___Powdery_mildew",
+    "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+    "Peach___Bacterial_spot",
+    "Potato___Early_blight",
+    "Potato___Late_blight",
+    "Potato___healthy",
+    "Strawberry___Leaf_scorch",
+    "Tomato___Target_Spot"
+  ],
+  "datasetPaths": {
+    "train_path_sub": "/root/.cache/kagglehub/datasets/tunphtnguynhu/newplantdiseasesdataset/versions/1/NewPlantDiseasesDataset/train",
+    "valid_path_sub": "/root/.cache/kagglehub/datasets/tunphtnguynhu/newplantdiseasesdataset/versions/1/NewPlantDiseasesDataset/valid",
+    "train_path": "/root/.cache/kagglehub/datasets/vipoooool/new-plant-diseases-dataset/versions/2/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset(Augmented)/train",
+    "valid_path": "/root/.cache/kagglehub/datasets/vipoooool/new-plant-diseases-dataset/versions/2/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset(Augmented)/valid"
+  },
+  "materialize": {
+    "data_root": "/home/data",
+    "main_base": "/root/.cache/kagglehub/datasets/vipoooool/new-plant-diseases-dataset/versions/2/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset(Augmented)",
+    "sub_base": "/root/.cache/kagglehub/datasets/tunphtnguynhu/newplantdiseasesdataset/versions/1/NewPlantDiseasesDataset",
+    "main_link": "/home/data/kaggle/new-plant-diseases-dataset",
+    "sub_link": "/home/data/kaggle/newplantdiseasesdataset",
+    "main_link_ok": true,
+    "sub_link_ok": true
+  },
+  "imageQuality": {
+    "overBrightImages": [
+      {
+        "label": "Tomato___Tomato_mosaic_virus",
+        "overBright": 295,
+        "total": 1790,
+        "ratio": 0.164804469273743
+      },
+      {
+        "label": "Raspberry___healthy",
+        "overBright": 283,
+        "total": 1781,
+        "ratio": 0.15889949466591802
+      },
+      {
+        "label": "Peach___healthy",
+        "overBright": 239,
+        "total": 1728,
+        "ratio": 0.13831018518518517
+      },
+      {
+        "label": "Apple___Cedar_apple_rust",
+        "overBright": 206,
+        "total": 1760,
+        "ratio": 0.11704545454545455
+      },
+      {
+        "label": "Pepper_bell___healthy",
+        "overBright": 200,
+        "total": 1988,
+        "ratio": 0.1006036217303823
+      },
+      {
+        "label": "Tomato___Target_Spot",
+        "overBright": 163,
+        "total": 1827,
+        "ratio": 0.08921729611384784
+      },
+      {
+        "label": "Blueberry___healthy",
+        "overBright": 156,
+        "total": 1816,
+        "ratio": 0.08590308370044053
+      },
+      {
+        "label": "Tomato___healthy",
+        "overBright": 155,
+        "total": 1926,
+        "ratio": 0.08047767393561786
+      },
+      {
+        "label": "Potato___healthy",
+        "overBright": 122,
+        "total": 1824,
+        "ratio": 0.0668859649122807
+      },
+      {
+        "label": "Corn_(maize)___healthy",
+        "overBright": 4,
+        "total": 1859,
+        "ratio": 0.002151694459386767
+      },
+      {
+        "label": "Soybean___healthy",
+        "overBright": 1,
+        "total": 2022,
+        "ratio": 0.0004945598417408506
+      }
+    ]
+  }
+}

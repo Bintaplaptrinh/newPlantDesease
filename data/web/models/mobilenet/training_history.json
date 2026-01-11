@@ -1,0 +1,270 @@
+{
+  "generatedAt": "2026-01-11T04:36:17+00:00",
+  "modelId": "mobilenet",
+  "timeTaken": "43m 12s",
+  "history": [
+    {
+      "epoch": 1,
+      "trainLoss": 1.2444,
+      "valLoss": 1.0417,
+      "trainAcc": 0.8442000000000001,
+      "valAcc": 0.9154000000000001,
+      "lr": 0.0009972883382072953
+    },
+    {
+      "epoch": 2,
+      "trainLoss": 1.0823,
+      "valLoss": 0.9658,
+      "trainAcc": 0.8989,
+      "valAcc": 0.9389,
+      "lr": 0.0009891830623632338
+    },
+    {
+      "epoch": 3,
+      "trainLoss": 1.0475,
+      "valLoss": 0.9628,
+      "trainAcc": 0.9113,
+      "valAcc": 0.9387000000000001,
+      "lr": 0.0009757729755661011
+    },
+    {
+      "epoch": 4,
+      "trainLoss": 1.0285,
+      "valLoss": 0.9517,
+      "trainAcc": 0.9177,
+      "valAcc": 0.9393,
+      "lr": 0.0009572050015330874
+    },
+    {
+      "epoch": 5,
+      "trainLoss": 1.0143,
+      "valLoss": 0.9318,
+      "trainAcc": 0.9218000000000001,
+      "valAcc": 0.9443,
+      "lr": 0.0009336825748732973
+    },
+    {
+      "epoch": 6,
+      "trainLoss": 1.0038,
+      "valLoss": 0.9147,
+      "trainAcc": 0.9244,
+      "valAcc": 0.9481999999999999,
+      "lr": 0.0009054634122155991
+    },
+    {
+      "epoch": 7,
+      "trainLoss": 0.9914,
+      "valLoss": 0.921,
+      "trainAcc": 0.9297,
+      "valAcc": 0.9462,
+      "lr": 0.0008728566886113102
+    },
+    {
+      "epoch": 8,
+      "trainLoss": 0.978,
+      "valLoss": 0.8962,
+      "trainAcc": 0.9338,
+      "valAcc": 0.9542,
+      "lr": 0.0008362196501476349
+    },
+    {
+      "epoch": 9,
+      "trainLoss": 0.9669,
+      "valLoss": 0.8975,
+      "trainAcc": 0.9378,
+      "valAcc": 0.9531000000000001,
+      "lr": 0.0007959536998847742
+    },
+    {
+      "epoch": 10,
+      "trainLoss": 0.9595,
+      "valLoss": 0.8917,
+      "trainAcc": 0.9393,
+      "valAcc": 0.9547,
+      "lr": 0.0007525
+    },
+    {
+      "epoch": 11,
+      "trainLoss": 0.9513,
+      "valLoss": 0.8831,
+      "trainAcc": 0.9412999999999999,
+      "valAcc": 0.9578,
+      "lr": 0.0007063346383225212
+    },
+    {
+      "epoch": 12,
+      "trainLoss": 0.9435,
+      "valLoss": 0.874,
+      "trainAcc": 0.9436,
+      "valAcc": 0.9577,
+      "lr": 0.000657963412215599
+    },
+    {
+      "epoch": 13,
+      "trainLoss": 0.9354,
+      "valLoss": 0.8679,
+      "trainAcc": 0.9457,
+      "valAcc": 0.9589,
+      "lr": 0.0006079162869547909
+    },
+    {
+      "epoch": 14,
+      "trainLoss": 0.9271,
+      "valLoss": 0.8647,
+      "trainAcc": 0.9476,
+      "valAcc": 0.9611,
+      "lr": 0.0005567415893174886
+    },
+    {
+      "epoch": 15,
+      "trainLoss": 0.9191,
+      "valLoss": 0.8594,
+      "trainAcc": 0.9503,
+      "valAcc": 0.9617,
+      "lr": 0.0005050000000000002
+    },
+    {
+      "epoch": 16,
+      "trainLoss": 0.9114,
+      "valLoss": 0.8549,
+      "trainAcc": 0.9527,
+      "valAcc": 0.9623,
+      "lr": 0.0004532584106825117
+    },
+    {
+      "epoch": 17,
+      "trainLoss": 0.9056,
+      "valLoss": 0.8563,
+      "trainAcc": 0.9549,
+      "valAcc": 0.9615,
+      "lr": 0.00040208371304520916
+    },
+    {
+      "epoch": 18,
+      "trainLoss": 0.8986,
+      "valLoss": 0.8547,
+      "trainAcc": 0.9568000000000001,
+      "valAcc": 0.9612,
+      "lr": 0.00035203658778440114
+    },
+    {
+      "epoch": 19,
+      "trainLoss": 0.8944,
+      "valLoss": 0.8428,
+      "trainAcc": 0.958,
+      "valAcc": 0.9643999999999999,
+      "lr": 0.00030366536167747904
+    },
+    {
+      "epoch": 20,
+      "trainLoss": 0.8881,
+      "valLoss": 0.8445,
+      "trainAcc": 0.9599,
+      "valAcc": 0.9640000000000001,
+      "lr": 0.00025750000000000013
+    },
+    {
+      "epoch": 21,
+      "trainLoss": 0.8837,
+      "valLoss": 0.8396,
+      "trainAcc": 0.9601999999999999,
+      "valAcc": 0.9645,
+      "lr": 0.00021404630011522585
+    },
+    {
+      "epoch": 22,
+      "trainLoss": 0.8785,
+      "valLoss": 0.8327,
+      "trainAcc": 0.9621,
+      "valAcc": 0.9648,
+      "lr": 0.00017378034985236535
+    },
+    {
+      "epoch": 23,
+      "trainLoss": 0.8733,
+      "valLoss": 0.8331,
+      "trainAcc": 0.9636,
+      "valAcc": 0.9656,
+      "lr": 0.00013714331138868998
+    },
+    {
+      "epoch": 24,
+      "trainLoss": 0.8698,
+      "valLoss": 0.8324,
+      "trainAcc": 0.9643999999999999,
+      "valAcc": 0.966,
+      "lr": 0.00010453658778440108
+    },
+    {
+      "epoch": 25,
+      "trainLoss": 0.8688,
+      "valLoss": 0.8296,
+      "trainAcc": 0.9656,
+      "valAcc": 0.9664,
+      "lr": 7.631742512670285e-05
+    },
+    {
+      "epoch": 26,
+      "trainLoss": 0.8654,
+      "valLoss": 0.8272,
+      "trainAcc": 0.9661,
+      "valAcc": 0.9669,
+      "lr": 5.279499846691252e-05
+    },
+    {
+      "epoch": 27,
+      "trainLoss": 0.8632,
+      "valLoss": 0.8262,
+      "trainAcc": 0.9654,
+      "valAcc": 0.9668000000000001,
+      "lr": 3.4227024433899005e-05
+    },
+    {
+      "epoch": 28,
+      "trainLoss": 0.8632,
+      "valLoss": 0.8251,
+      "trainAcc": 0.9659,
+      "valAcc": 0.9669,
+      "lr": 2.0816937636766188e-05
+    },
+    {
+      "epoch": 29,
+      "trainLoss": 0.8587,
+      "valLoss": 0.8249,
+      "trainAcc": 0.9672,
+      "valAcc": 0.9673999999999999,
+      "lr": 1.2711661792704668e-05
+    },
+    {
+      "epoch": 30,
+      "trainLoss": 0.8587,
+      "valLoss": 0.8243,
+      "trainAcc": 0.9676,
+      "valAcc": 0.9676,
+      "lr": 1e-05
+    }
+  ],
+  "hyperparameters": {
+    "model": "MobileNetV3 Large",
+    "optimizer": "AdamW",
+    "learningRate": 0.001,
+    "batchSize": 64,
+    "epochs": 30,
+    "imageSize": "224x224",
+    "dropout": 0.2,
+    "l2Regularization": 0.0001,
+    "augmentation": [
+      "RandomResizedCrop(scale=0.6..1.0, ratio=0.75..1.3333)",
+      "RandomHorizontalFlip(p=0.5)",
+      "RandAugment(num_ops=2, magnitude=9) [if available]",
+      "ColorJitter(brightness=0.4, contrast=0.4, saturation=0.25, hue=0.02) (p=0.8)",
+      "GaussianBlur(kernel_size=3, sigma=0.1..2.0) (p=0.3)",
+      "RandomPerspective(distortion_scale=0.25, p=0.2)",
+      "Normalize(ImageNet mean/std)",
+      "RandomErasing(p=0.25, scale=0.02..0.15, ratio=0.3..3.3)"
+    ],
+    "labelSmoothing": 0.1,
+    "scheduler": "CosineAnnealingLR(T_max=epochs, eta_min=1e-5)",
+    "notes": "Train classifier only; optional AdaBN + TTA flip in validation."
+  }
+}

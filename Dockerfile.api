@@ -1,0 +1,21 @@
+# Backend (Python)
+FROM python:3.11-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+WORKDIR /app
+
+# No extra system deps needed for the inference server.
+
+COPY requirements.docker.txt ./
+
+# Use pip cache layer
+RUN pip install --no-cache-dir -r requirements.docker.txt
+
+COPY . .
+
+EXPOSE 5000
+
+# Use 0.0.0.0 inside container (127.0.0.1 would not be reachable)
+CMD ["python", "-m", "src.main", "serve", "--host", "0.0.0.0", "--port", "5000"]

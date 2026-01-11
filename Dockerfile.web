@@ -1,0 +1,19 @@
+# Frontend (Vite dev server)
+FROM node:20-slim
+
+WORKDIR /app
+
+# pnpm via corepack
+RUN corepack enable
+
+# Pre-copy manifests for better caching
+COPY web/NewPlantDesease/package.json web/NewPlantDesease/pnpm-lock.yaml ./
+
+RUN pnpm install
+
+# Copy app (will be overridden by volume in docker-compose for dev)
+COPY web/NewPlantDesease ./
+
+EXPOSE 5173
+
+CMD ["pnpm", "dev", "--host", "0.0.0.0", "--port", "5173"]

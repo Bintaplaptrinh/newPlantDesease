@@ -1,0 +1,496 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather:ital,opsz,wght@0,18..144,300..900;1,18..144,300..900&display=swap');
+@import "tailwindcss";
+/* CSS Variables for theming - Light Mode */
+:root {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+  --card: 0 0% 98%;
+  --card-foreground: 0 0% 10%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+  --primary: 195 59% 45%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 195 30% 90%;
+  --secondary-foreground: 0 0% 10%;
+  --muted: 0 0% 96%;
+  --muted-foreground: 0 0% 45%;
+  --accent: 195 59% 45%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 62.8% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  --ring: 195 59% 45%;
+  --radius: 0.75rem;
+
+  /* Primary brand color */
+  --brand-primary: #2596be;
+  --brand-primary-light: #3db8e5;
+  --brand-primary-dark: #1a7a9c;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Merriweather", serif;
+  background: #ffffff;
+  color: #1a1a1a;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+button {
+  cursor: pointer;
+  font-family: "Merriweather", serif;
+  padding: 0.3rem;
+}
+h3{
+  padding: 0.3rem;
+}
+p{
+  margin: 3px;
+}
+.w-full{
+  margin-top: 3rem;
+}
+.space-y-10{
+  margin-top: 0.7rem;
+}
+.upload-zone{
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.upload-zone div{
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.upload-zone p{
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+.upload-zone svg{
+  width: 40px;
+  height: 40px;
+  color: #2596be;
+  padding-bottom: 0.5rem;
+  margin-left: 35%;
+}
+.upload-zone button{
+  background: transparent;
+  border: solid 2px #2596be;
+  border-radius: 8px;
+}
+.upload-zone button svg{
+  width: 5rem;
+  height: 5rem;
+  padding-top: 0.4rem;
+  padding-right: 0.2rem;
+}
+.glass-nav{
+  box-shadow: none !important;
+  border-radius: 17px !important;
+}
+.glass-nav span{
+  font-size: 12px !important;
+}
+.glass-card{
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+}
+.flex span{
+  padding: 0.2rem;
+}
+.mgb-5{
+  margin-bottom: 0.5rem;
+}
+/* Scrollbar styling - Light theme */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg,
+      #2596be 0%,
+      #3db8e5 100%);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg,
+      #1a7a9c 0%,
+      #2596be 100%);
+}
+
+/* Glass card - Light theme with blur */
+.glass-card {
+  background: transparent;
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
+  border: 1px solid rgba(37, 150, 190, 0.15);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 8px 32px rgba(37, 150, 190, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* Stronger mirrored glass for navigation panels */
+.glass-nav {
+  position: relative;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.78) 0%,
+    rgba(255, 255, 255, 0.38) 55%,
+    rgba(255, 255, 255, 0.62) 100%
+  );
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: inherit;
+  box-shadow:
+    0 14px 50px rgba(0, 0, 0, 0.12),
+    0 6px 18px rgba(37, 150, 190, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.glass-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.72) 0%,
+    rgba(255, 255, 255, 0.08) 55%,
+    rgba(255, 255, 255, 0.0) 100%
+  );
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+.glass-nav::after {
+  content: "";
+  position: absolute;
+  left: 10%;
+  top: 8%;
+  width: 55%;
+  height: 24%;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.65) 0%,
+    rgba(255, 255, 255, 0.0) 70%
+  );
+  filter: blur(2px);
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.glass-card-hover:hover {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(37, 150, 190, 0.25);
+  box-shadow:
+    0 12px 48px rgba(37, 150, 190, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  transform: translateY(-4px);
+}
+
+/* Gradient text - Brand color */
+.gradient-text {
+  background: linear-gradient(135deg,
+      #2596be 0%,
+      #3db8e5 50%,
+      #1a7a9c 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Title specific styles with transform and blur */
+.title-styled {
+  color: #2596be;
+  text-shadow: 0 2px 10px rgba(37, 150, 190, 0.3);
+  transform: translateZ(0);
+  backdrop-filter: blur(1px);
+}
+
+.gradient-border {
+  position: relative;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg,
+      #2596be 0%,
+      #3db8e5 50%,
+      #1a7a9c 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+/* Glow effects - Light theme */
+.glow-primary {
+  box-shadow: 0 0 30px rgba(37, 150, 190, 0.25);
+}
+
+.glow-accent {
+  box-shadow: 0 0 30px rgba(37, 150, 190, 0.2);
+}
+
+/* Animation utilities */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.animate-gradient {
+  background-size: 200% 200%;
+  animation: gradient-shift 5s ease infinite;
+}
+
+/* Navigation dot styles - Light theme */
+.nav-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(37, 150, 190, 0.2);
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.nav-dot:hover {
+  background: rgba(37, 150, 190, 0.4);
+  transform: scale(1.2);
+}
+
+.nav-dot.active {
+  background: linear-gradient(135deg, #2596be, #3db8e5);
+  border-color: rgba(37, 150, 190, 0.3);
+  box-shadow: 0 0 15px rgba(37, 150, 190, 0.4);
+  transform: scale(1.3);
+}
+
+/* Section transitions */
+.section-enter {
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.section-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+/* Canvas container styles */
+.canvas-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* Chart styles */
+.recharts-wrapper {
+  font-family: "Merriweather", serif !important;
+}
+
+/* Atropos overrides for light theme */
+.atropos {
+  perspective: 1000px;
+}
+
+.atropos-inner {
+  border-radius: 1.5rem;
+}
+
+.atropos-shadow {
+  background: radial-gradient(ellipse at center,
+      rgba(37, 150, 190, 0.15) 0%,
+      transparent 70%);
+}
+
+.atropos-highlight {
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.4) 0%,
+      transparent 50%);
+}
+
+/* Deck.gl container */
+.deck-container {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+/* Upload zone styling - Light theme */
+.upload-zone {
+  border: 2px dashed rgba(37, 150, 190, 0.3);
+  border-radius: 1rem;
+  transition: all 0.3s ease;
+  background: rgba(37, 150, 190, 0.02);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+}
+
+.upload-zone:hover,
+.upload-zone.drag-over {
+  border-color: #2596be;
+  background: rgba(37, 150, 190, 0.05);
+}
+
+/* Text color utilities for light theme */
+.text-primary {
+  color: #1a1a1a;
+}
+
+.text-secondary {
+  color: #4a4a4a;
+}
+
+.text-muted {
+  color: #6a6a6a;
+}
+
+.text-brand {
+  color: #2596be;
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .glass-card {
+    border-radius: 1rem;
+  }
+
+  .nav-dot {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+/* Override white text classes to black for light theme */
+.text-white {
+  color: #1a1a1a !important;
+}
+
+.text-white\/90 {
+  color: rgba(26, 26, 26, 0.9) !important;
+}
+
+.text-white\/80 {
+  color: rgba(26, 26, 26, 0.8) !important;
+}
+
+.text-white\/70 {
+  color: rgba(26, 26, 26, 0.7) !important;
+}
+
+.text-white\/60 {
+  color: rgba(26, 26, 26, 0.6) !important;
+}
+
+.text-white\/50 {
+  color: rgba(26, 26, 26, 0.5) !important;
+}
+
+.text-white\/40 {
+  color: rgba(26, 26, 26, 0.4) !important;
+}
+
+/* Background overrides for light theme */
+.bg-white\/10 {
+  background-color: rgba(37, 150, 190, 0.08) !important;
+}
+
+.bg-white\/5 {
+  background-color: rgba(37, 150, 190, 0.04) !important;
+}
+
+/* Border overrides */
+.border-white\/10 {
+  border-color: rgba(37, 150, 190, 0.15) !important;
+}
+
+.border-white\/20 {
+  border-color: rgba(37, 150, 190, 0.2) !important;
+}
+
+/* Header background for light theme */
+.from-slate-900\/90 {
+  --tw-gradient-from: rgba(255, 255, 255, 0.95) !important;
+}
+
+/* Fix gradient backgrounds */
+.from-emerald-500\/10,
+.from-cyan-500\/10,
+.from-purple-500\/10,
+.from-emerald-500\/20,
+.from-cyan-500\/20 {
+  opacity: 0.8;
+}

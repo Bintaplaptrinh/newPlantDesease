@@ -1,0 +1,11 @@
+# Docker-focused requirements
+# Force CPU-only PyTorch wheels on Linux to avoid pulling CUDA (~GBs)
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
+
+torch
+torchvision
+numpy
+flask
+flask-cors
+pillow

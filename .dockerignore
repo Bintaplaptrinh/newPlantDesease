@@ -1,0 +1,22 @@
+.git
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.pytest_cache
+
+# Large datasets / caches (do NOT send to Docker build context)
+data/kaggle/
+data/kaggle/**
+data/**/.ipynb_checkpoints/
+
+.venv/
+venv/
+
+# Model training artifacts (keep src/model/*.pth in the image; don't ignore globally)
+
+
+web/NewPlantDesease/node_modules
+web/NewPlantDesease/dist
+
+.DS_Store

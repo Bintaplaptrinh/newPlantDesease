@@ -1,0 +1,197 @@
+{
+  "generatedAt": "2026-01-11T10:39:45+00:00",
+  "items": [
+    {
+      "label": "Apple___Apple_scab",
+      "shortLabel": "Apple Apple scab",
+      "count": 2520
+    },
+    {
+      "label": "Apple___Black_rot",
+      "shortLabel": "Apple Black rot",
+      "count": 2484
+    },
+    {
+      "label": "Apple___Cedar_apple_rust",
+      "shortLabel": "Apple Cedar apple rust",
+      "count": 2200
+    },
+    {
+      "label": "Apple___healthy",
+      "shortLabel": "Apple healthy",
+      "count": 2510
+    },
+    {
+      "label": "Blueberry___healthy",
+      "shortLabel": "Blueberry healthy",
+      "count": 2270
+    },
+    {
+      "label": "Cherry_(including_sour)___Powdery_mildew",
+      "shortLabel": "Cherry (including sour) Powdery mildew",
+      "count": 2104
+    },
+    {
+      "label": "Cherry_(including_sour)___healthy",
+      "shortLabel": "Cherry (including sour) healthy",
+      "count": 2282
+    },
+    {
+      "label": "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot",
+      "shortLabel": "Corn (maize) Cercospora leaf spot Gray leaf spot",
+      "count": 2052
+    },
+    {
+      "label": "Corn_(maize)___Common_rust_",
+      "shortLabel": "Corn (maize) Common rust",
+      "count": 2384
+    },
+    {
+      "label": "Corn_(maize)___Northern_Leaf_Blight",
+      "shortLabel": "Corn (maize) Northern Leaf Blight",
+      "count": 2385
+    },
+    {
+      "label": "Corn_(maize)___healthy",
+      "shortLabel": "Corn (maize) healthy",
+      "count": 2324
+    },
+    {
+      "label": "Grape___Black_rot",
+      "shortLabel": "Grape Black rot",
+      "count": 2360
+    },
+    {
+      "label": "Grape___Esca_(Black_Measles)",
+      "shortLabel": "Grape Esca (Black Measles)",
+      "count": 2400
+    },
+    {
+      "label": "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)",
+      "shortLabel": "Grape Leaf blight (Isariopsis Leaf Spot)",
+      "count": 2152
+    },
+    {
+      "label": "Grape___healthy",
+      "shortLabel": "Grape healthy",
+      "count": 2115
+    },
+    {
+      "label": "Orange___Haunglongbing_(Citrus_greening)",
+      "shortLabel": "Orange Haunglongbing (Citrus greening)",
+      "count": 2513
+    },
+    {
+      "label": "Peach___Bacterial_spot",
+      "shortLabel": "Peach Bacterial spot",
+      "count": 2297
+    },
+    {
+      "label": "Peach___healthy",
+      "shortLabel": "Peach healthy",
+      "count": 2160
+    },
+    {
+      "label": "Pepper,_bell___Bacterial_spot",
+      "shortLabel": "Pepper, bell Bacterial spot",
+      "count": 2391
+    },
+    {
+      "label": "Pepper,_bell___healthy",
+      "shortLabel": "Pepper, bell healthy",
+      "count": 2485
+    },
+    {
+      "label": "Potato___Early_blight",
+      "shortLabel": "Potato Early blight",
+      "count": 2424
+    },
+    {
+      "label": "Potato___Late_blight",
+      "shortLabel": "Potato Late blight",
+      "count": 2424
+    },
+    {
+      "label": "Potato___healthy",
+      "shortLabel": "Potato healthy",
+      "count": 2280
+    },
+    {
+      "label": "Raspberry___healthy",
+      "shortLabel": "Raspberry healthy",
+      "count": 2226
+    },
+    {
+      "label": "Soybean___healthy",
+      "shortLabel": "Soybean healthy",
+      "count": 2527
+    },
+    {
+      "label": "Squash___Powdery_mildew",
+      "shortLabel": "Squash Powdery mildew",
+      "count": 2170
+    },
+    {
+      "label": "Strawberry___Leaf_scorch",
+      "shortLabel": "Strawberry Leaf scorch",
+      "count": 2218
+    },
+    {
+      "label": "Strawberry___healthy",
+      "shortLabel": "Strawberry healthy",
+      "count": 2280
+    },
+    {
+      "label": "Tomato___Bacterial_spot",
+      "shortLabel": "Tomato Bacterial spot",
+      "count": 2127
+    },
+    {
+      "label": "Tomato___Early_blight",
+      "shortLabel": "Tomato Early blight",
+      "count": 2400
+    },
+    {
+      "label": "Tomato___Late_blight",
+      "shortLabel": "Tomato Late blight",
+      "count": 2314
+    },
+    {
+      "label": "Tomato___Leaf_Mold",
+      "shortLabel": "Tomato Leaf Mold",
+      "count": 2352
+    },
+    {
+      "label": "Tomato___Septoria_leaf_spot",
+      "shortLabel": "Tomato Septoria leaf spot",
+      "count": 2181
+    },
+    {
+      "label": "Tomato___Spider_mites Two-spotted_spider_mite",
+      "shortLabel": "Tomato Spider mites Two-spotted spider mite",
+      "count": 2176
+    },
+    {
+      "label": "Tomato___Target_Spot",
+      "shortLabel": "Tomato Target Spot",
+      "count": 2284
+    },
+    {
+      "label": "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+      "shortLabel": "Tomato Tomato Yellow Leaf Curl Virus",
+      "count": 2451
+    },
+    {
+      "label": "Tomato___Tomato_mosaic_virus",
+      "shortLabel": "Tomato Tomato mosaic virus",
+      "count": 2238
+    },
+    {
+      "label": "Tomato___healthy",
+      "shortLabel": "Tomato healthy",
+      "count": 2407
+    }
+  ],
+  "totalImages": 87867,
+  "numClasses": 38
+}

@@ -1,0 +1,2 @@
+main_base=/root/.cache/kagglehub/datasets/vipoooool/new-plant-diseases-dataset/versions/2/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset(Augmented)
+sub_base=/root/.cache/kagglehub/datasets/tunphtnguynhu/newplantdiseasesdataset/versions/1/NewPlantDiseasesDataset

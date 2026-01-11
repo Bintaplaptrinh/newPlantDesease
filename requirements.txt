@@ -1,0 +1,16 @@
+torch
+torchvision
+torchaudio
+kagglehub
+numpy
+pandas
+matplotlib
+plotly
+opencv-python
+scikit-learn
+tqdm
+ipython
+nbformat
+flask
+flask-cors
+pillow

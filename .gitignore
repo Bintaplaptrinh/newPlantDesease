@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# # Data (do not commit datasets)
+data/kaggle/
+data/kaggle/**
+
+# Optional: keep generated web artifacts tracked if you want
+# data/web/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Frontend
+web/NewPlantDesease/node_modules/
+web/NewPlantDesease/dist/
+
+# pnpm store/cache (never commit)
+web/NewPlantDesease/.pnpm-store/
+**/.pnpm-store/
+
+# Logs
+*.log
