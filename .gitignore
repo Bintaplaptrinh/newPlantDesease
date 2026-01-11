@@ -19,6 +19,7 @@ Thumbs.db
 # Frontend
 web/NewPlantDesease/node_modules/
 web/NewPlantDesease/dist/
+web/NewPlantDesease/package-lock.json
 
 # pnpm store/cache (never commit)
 web/NewPlantDesease/.pnpm-store/
