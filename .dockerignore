@@ -14,8 +14,6 @@ data/**/.ipynb_checkpoints/
 venv/
 
 # Model training artifacts (keep src/model/*.pth in the image; don't ignore globally)
-
-
 web/NewPlantDesease/node_modules
 web/NewPlantDesease/dist
 

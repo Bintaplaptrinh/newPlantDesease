@@ -9,7 +9,5 @@ numpy
 flask
 flask-cors
 pillow
-
-# Needed for YOLOv11 detection (ultralytics) and image preprocessing (cv2)
 opencv-python-headless
 ultralytics
