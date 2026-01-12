@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# cấu hình cho flask server: đường dẫn artifact web, model pth, và model yolo (nếu có)
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, Optional
@@ -9,11 +11,12 @@ from src.utils.paths import project_paths
 
 @dataclass(frozen=True)
 class ServerConfig:
+    # config chạy server (đường dẫn data/web và đường dẫn model)
     data_web_dir: Path
     models: Dict[str, Path]
     yolo_model_path: Optional[Path] = None
     default_image_size: int = 224
-    yolo_detection_size: int = 640  # Standard YOLO input size
+    yolo_detection_size: int = 640  # size input chuẩn của yolo
 
     @staticmethod
     def default() -> "ServerConfig":
@@ -36,7 +39,7 @@ class ServerConfig:
 
 
 def safe_join(base: Path, relative: str) -> Path:
-    # Prevent path traversal
+    # nối path an toàn, tránh path traversal (..)
     target = (base / relative).resolve()
     base_resolved = base.resolve()
     if base_resolved not in target.parents and target != base_resolved:
@@ -45,6 +48,7 @@ def safe_join(base: Path, relative: str) -> Path:
 
 
 def detect_device() -> str:
+    # auto chọn device để infer (ưu tiên cuda nếu có)
     try:
         import torch
 

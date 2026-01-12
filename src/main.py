@@ -1,11 +1,15 @@
 from __future__ import annotations
 
+# entrypoint cli cho repo
+# các lệnh chính: prepare-data (tạo artifact web), placeholders (tạo json rỗng), serve (chạy api)
+
 import argparse
 
 from src.pipeline import ensure_web_placeholders, prepare_and_export_web_data
 
 
 def _build_parser() -> argparse.ArgumentParser:
+	# build parser cho cli
 	p = argparse.ArgumentParser(prog="newplant", description="NewPlantDesease pipeline (no training executed by default)")
 	sub = p.add_subparsers(dest="cmd", required=True)
 
@@ -26,6 +30,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
+	# dispatch theo subcommand
 	parser = _build_parser()
 	args = parser.parse_args(argv)
 

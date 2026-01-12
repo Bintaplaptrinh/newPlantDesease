@@ -22,8 +22,8 @@ from src.web_artifacts import (
 
 
 def _count_labels_from_concat_dataset(ds) -> np.ndarray:
-    # ds could be ImageFolder or ConcatDataset; iterate targets through samples
-    # We avoid loading actual image tensors.
+    # đếm số lượng ảnh theo label từ dataset
+    # hỗ trợ ImageFolder hoặc ConcatDataset, và cố gắng tránh load tensor ảnh thật
     counts = None
 
     def ensure(n: int):
@@ -31,17 +31,17 @@ def _count_labels_from_concat_dataset(ds) -> np.ndarray:
         if counts is None:
             counts = np.zeros((n,), dtype=int)
 
-    # ImageFolder
+    # trường hợp ImageFolder: có sẵn targets và classes
     if hasattr(ds, "targets") and hasattr(ds, "classes"):
         ensure(len(ds.classes))
         for y in ds.targets:
             counts[int(y)] += 1
         return counts
 
-    # ConcatDataset / Subset / Remap
+    # trường hợp ConcatDataset / Subset / Remap: iterate ra (x, y)
     for _, y in ds:
         if counts is None:
-            # y is already new index; we don't know num classes here, caller should handle
+            # y đã là index mới, nhưng ở nhánh này không biết num_classes
             raise RuntimeError("Unable to infer num_classes from iterable dataset")
         counts[int(y)] += 1
 
@@ -57,21 +57,19 @@ def prepare_and_export_web_data(
     exclude_old_injection_classes: Optional[set[str]] = None,
     paths: Optional[WebArtifactsPaths] = None,
 ) -> Dict[str, Any]:
-    """Download + merge datasets, then export dataset + placeholder model JSON for the web.
-
-    This does NOT train. It only prepares dataset loaders and exports:
-    - data/web/classes.json
-    - data/web/dataset_stats.json
-    - data/web/class_distribution.json
-    - data/web/models.json (model registry only; metrics can be added later)
-    """
+    # tải + gộp dataset, sau đó export dataset + file json placeholder cho web
+    # hàm này không train model, chỉ chuẩn bị dataloader và export:
+    # - data/web/classes.json
+    # - data/web/dataset_stats.json
+    # - data/web/class_distribution.json
+    # - data/web/models.json (chỉ registry; metrics có thể bổ sung sau)
 
     paths = paths or WebArtifactsPaths.default()
     exclude_old_injection_classes = exclude_old_injection_classes or default_exclude_old_injection_classes()
 
     pack = prepare_data(image_size=image_size, batch_size=batch_size, num_workers=num_workers)
 
-    # ensure kaggle downloads are visible under data/
+    # đảm bảo dataset download từ kaggle hiển thị dưới data/ (tạo junction hoặc ghi path)
     ds_paths: DatasetPaths = pack["paths"]
     materialize_info = materialize_data_folder(ds_paths, data_root=data_root)
 
@@ -81,7 +79,7 @@ def prepare_and_export_web_data(
     train_base_ds = pack["train_base_ds"]
     valid_base_ds = pack["valid_base_ds"]
 
-    # counts based on the NEW (main) dataset; this is stable and does not require iterating over transforms
+    # đếm dựa trên dataset chính (main) để ổn định và không phụ thuộc transform
     train_counts = _count_labels_from_concat_dataset(train_base_ds)
     val_counts = _count_labels_from_concat_dataset(valid_base_ds)
     total_counts = train_counts + val_counts
@@ -102,7 +100,7 @@ def prepare_and_export_web_data(
     )
     write_class_distribution(class_names, total_counts, paths=paths)
 
-    # minimal model registry; metrics/hyperparams can be filled by training/evaluation run elsewhere.
+    # model registry tối thiểu; metrics/hyperparams có thể bổ sung sau bởi bước training/evaluation
     model_index = [
         {
             "id": "mobilenet",
@@ -139,16 +137,14 @@ def prepare_and_export_web_data(
 
 
 def ensure_web_placeholders(*, paths: Optional[WebArtifactsPaths] = None) -> None:
-    """Create empty placeholder JSON for artifacts that depend on evaluation/training.
-
-    Web reads these and shows empty/"not available" states instead of demo data.
-    """
+    # tạo json placeholder rỗng cho các artifact phụ thuộc evaluation/training
+    # web sẽ đọc các file này và hiển thị trạng thái trống/"không có" thay vì demo data
 
     from src.utils.json_io import write_json
 
     paths = paths or WebArtifactsPaths.default()
 
-    # Safety: do not overwrite real artifacts if they already exist.
+    # an toàn: không ghi đè artifact thật nếu file đã tồn tại
     if not paths.roc_micro_json.exists():
         write_json(paths.roc_micro_json, {"generatedAt": None, "points": [], "aucs": {}})
 
@@ -163,7 +159,7 @@ def ensure_web_placeholders(*, paths: Optional[WebArtifactsPaths] = None) -> Non
 
 
 def export_web_from_trained_models(*args, **kwargs):
-    # Kept for backward compatibility if you later implement evaluation-based exports.
+    # giữ để tương thích ngược nếu sau này bạn muốn implement export dựa trên evaluation
     raise NotImplementedError(
         "Use a training/evaluation machine to compute metrics and write JSON into data/web. "
         "This repo currently exports dataset-level JSON + placeholders only."

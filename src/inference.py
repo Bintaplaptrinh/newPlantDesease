@@ -21,10 +21,8 @@ class Prediction:
 
 
 def _apply_jet_colormap(gray_u8: np.ndarray) -> np.ndarray:
-    """Approximate OpenCV COLORMAP_JET for a uint8 grayscale image.
-
-    Returns RGB uint8 array (H, W, 3).
-    """
+    # xấp xỉ colormap JET (giống OpenCV) cho ảnh xám uint8
+    # trả về mảng rgb uint8 (H, W, 3)
 
     if gray_u8.dtype != np.uint8:
         gray_u8 = gray_u8.astype(np.uint8)
@@ -89,10 +87,8 @@ def predict_images(
     top_k: int = 5,
     device: str,
 ) -> List[Tuple[str, float, List[Dict[str, float]]]]:
-    """Batch predict a list of PIL images.
-
-    Returns one (label, confidence, top_k_list) per image.
-    """
+    # dự đoán theo batch cho danh sách ảnh PIL
+    # trả về (label, confidence, top_k_list) cho từng ảnh
 
     if not images:
         return []
@@ -133,13 +129,9 @@ def saliency_heatmap_png(
     device: str,
     target_index: int | None = None,
 ) -> Tuple[str, int, bytes]:
-    """Compute a simple gradient saliency heatmap.
-
-    This is architecture-agnostic and works with any classifier that maps
-    NCHW -> logits.
-
-    Returns: (target_label, target_index, heatmap_png_bytes)
-    """
+    # tạo heatmap saliency đơn giản dựa trên gradient
+    # cách này không phụ thuộc kiến trúc, miễn là model nhận NCHW và trả logits
+    # trả về: (target_label, target_index, heatmap_png_bytes)
 
     _, val_t = build_transforms(image_size=image_size)
 

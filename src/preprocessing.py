@@ -1,3 +1,6 @@
+# module chuẩn bị dữ liệu: download dataset kaggle, build transforms/datasets/loaders,
+# và materialize dataset vào thư mục data/ để tiện chạy web/server
+
 import os
 import subprocess
 from dataclasses import dataclass
@@ -18,7 +21,7 @@ class DatasetPaths:
 
 
 def build_transforms(image_size: int = 224):
-    # Augmentations used in notebook
+    # augmentations dùng trong notebook
     train_transform_list = [
         transforms.RandomResizedCrop(image_size, scale=(0.6, 1.0), ratio=(0.75, 1.3333)),
         transforms.RandomHorizontalFlip(p=0.5),
@@ -36,7 +39,7 @@ def build_transforms(image_size: int = 224):
     try:
         train_transform_list.insert(2, transforms.RandAugment(num_ops=2, magnitude=9))
     except Exception:
-        # RandAugment not available in some torchvision versions
+        # randaugment không có ở một số phiên bản torchvision
         pass
 
     train_transform_list += [
@@ -60,10 +63,13 @@ def build_transforms(image_size: int = 224):
 
 
 def download_kaggle_datasets() -> DatasetPaths:
-    # Downloads 2 datasets exactly like notebook
+    # download 2 dataset giống notebook (một bản chính augmented + một bản phụ)
     import kagglehub
 
+    # dataset phụ: cấu trúc thư mục NewPlantDiseasesDataset/{train,valid}
     path_sub = kagglehub.dataset_download("tunphtnguynhu/newplantdiseasesdataset")
+
+    # dataset chính: bản augmented, cấu trúc thư mục dài hơn
     path_main = kagglehub.dataset_download("vipoooool/new-plant-diseases-dataset")
 
     train_path_sub = str(os.path.join(path_sub, "NewPlantDiseasesDataset", "train"))
@@ -96,6 +102,7 @@ def download_kaggle_datasets() -> DatasetPaths:
 
 class RemapByClassName(Dataset):
     def __init__(self, base_ds: ImageFolder, class_to_new_idx: Dict[str, int], allowed_indices: Sequence[int]):
+        # wrapper dataset: remap label theo tên class, và chỉ lấy subset theo allowed_indices
         self.base_ds = base_ds
         self.class_to_new_idx = class_to_new_idx
         self.allowed_indices = list(allowed_indices)
@@ -117,17 +124,19 @@ def build_datasets(
     val_transform,
     exclude_old_injection_classes: Optional[Set[str]] = None,
 ):
-    # Builds NEW train/valid + injects OLD valid into train/valid
+    # build train/valid cho dataset chính, sau đó inject một phần old valid để tăng dữ liệu
     exclude_old_injection_classes = exclude_old_injection_classes or set()
 
     train_base_ds = ImageFolder(paths.train_path, transform=train_transform)
     valid_base_ds = ImageFolder(paths.valid_path, transform=val_transform)
 
+    # dùng valid của dataset phụ làm nguồn inject (transform khác nhau cho train/val)
     old_valid_train_raw = ImageFolder(paths.valid_path_sub, transform=train_transform)
     old_valid_val_raw = ImageFolder(paths.valid_path_sub, transform=val_transform)
 
     new_class_to_idx = train_base_ds.class_to_idx
 
+    # map theo tên class để align label giữa 2 dataset
     class_name_map = {
         name: new_class_to_idx[name]
         for name in old_valid_train_raw.classes
@@ -148,8 +157,10 @@ def build_datasets(
     old_valid_val_mapped = RemapByClassName(old_valid_val_raw, class_name_map, old_mappable_indices)
 
     n_old = len(old_valid_train_mapped)
+    # split 50/50 phần old valid: một nửa inject vào train, phần còn lại inject vào valid
     n_old_to_train = int(0.5 * n_old)  # OLD_VALID_SPLIT_TO_TRAIN=0.5
 
+    # cố định seed để kết quả split ổn định
     g = torch.Generator().manual_seed(42)  # SEED=42
     perm = torch.randperm(n_old, generator=g).tolist()
     idx_old_train = perm[:n_old_to_train]
@@ -175,6 +186,7 @@ def build_datasets(
 
 
 def build_loaders(train_ds, valid_ds, batch_size: int = 64, num_workers: int = 8):
+    # tạo dataloader cho train/valid
     train_loader = DataLoader(
         train_ds,
         batch_size=batch_size,
@@ -195,7 +207,7 @@ def build_loaders(train_ds, valid_ds, batch_size: int = 64, num_workers: int = 8
 
 
 def default_exclude_old_injection_classes() -> Set[str]:
-    # Exclude old classes that harm label alignment
+    # loại bỏ một số class từ dataset phụ vì dễ làm lệch nhãn/giảm chất lượng
     return {
         "Apple___Black_rot",
         "Cherry_(including_sour)___Powdery_mildew",
@@ -210,7 +222,7 @@ def default_exclude_old_injection_classes() -> Set[str]:
 
 
 def prepare_data(image_size: int = 224, batch_size: int = 64, num_workers: int = 8):
-    # Download + build + merge datasets, then create loaders
+    # download + build + merge dataset, sau đó tạo dataloader
     paths = download_kaggle_datasets()
     train_t, val_t = build_transforms(image_size=image_size)
 
@@ -238,13 +250,13 @@ def prepare_data(image_size: int = 224, batch_size: int = 64, num_workers: int =
 
 
 def _try_make_junction(dst: str, src: str) -> bool:
-    # Create a Windows directory junction so data/ contains the dataset without copying
+    # tạo junction trên windows để data/ trỏ tới dataset mà không cần copy
     if os.path.exists(dst):
         return True
     os.makedirs(os.path.dirname(dst), exist_ok=True)
 
     try:
-        # mklink /J works on Windows for directories
+        # mklink /J dùng được cho thư mục trên windows
         completed = subprocess.run(
             ["cmd", "/c", "mklink", "/J", dst, src],
             check=False,
@@ -257,7 +269,7 @@ def _try_make_junction(dst: str, src: str) -> bool:
 
 
 def materialize_data_folder(paths: DatasetPaths, data_root: str = "data"):
-    # Ensure downloaded datasets appear under data/ for submission
+    # đảm bảo dataset download xuất hiện dưới data/ để tiện nộp bài/chạy demo
     base_main = os.path.commonpath([paths.train_path, paths.valid_path])
     base_sub = os.path.commonpath([paths.train_path_sub, paths.valid_path_sub])
 
@@ -271,7 +283,7 @@ def materialize_data_folder(paths: DatasetPaths, data_root: str = "data"):
     ok_main = _try_make_junction(link_main, base_main)
     ok_sub = _try_make_junction(link_sub, base_sub)
 
-    # Fallback: write paths if junction creation fails
+    # fallback: nếu tạo junction fail thì ghi path ra file để người dùng tự xử lí
     if not (ok_main and ok_sub):
         os.makedirs(out_dir, exist_ok=True)
         with open(os.path.join(out_dir, "DATASET_PATHS.txt"), "w", encoding="utf-8") as f:

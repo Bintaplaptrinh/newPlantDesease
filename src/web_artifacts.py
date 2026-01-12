@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# tạo/cập nhật các artifact json để frontend đọc (classes, stats, distribution, models, ...)
+
 from dataclasses import dataclass
 from datetime import datetime, timezone
 import json
@@ -13,16 +15,18 @@ from src.utils.paths import project_paths
 
 
 def _utc_now_iso() -> str:
+    # lấy timestamp utc dạng iso (bỏ microsecond cho gọn)
     return datetime.now(timezone.utc).replace(microsecond=0).isoformat()
 
 
 def _short_label(full: str) -> str:
-    # "Tomato___Bacterial_spot" -> "Tomato Bacterial spot"
+    # rút gọn nhãn cho ui: "Tomato___Bacterial_spot" -> "Tomato Bacterial spot"
     return full.replace("___", " ").replace("_", " ").strip()
 
 
 @dataclass(frozen=True)
 class WebArtifactsPaths:
+    # gom các path artifact json cho web
     base_dir: Path
 
     @staticmethod
@@ -61,6 +65,7 @@ class WebArtifactsPaths:
 
 
 def write_classes(class_labels: List[str], *, paths: Optional[WebArtifactsPaths] = None) -> None:
+    # ghi classes.json (labels + shortLabels)
     paths = paths or WebArtifactsPaths.default()
     payload = {
         "generatedAt": _utc_now_iso(),
@@ -81,6 +86,7 @@ def write_dataset_stats(
     extra: Optional[Dict[str, Any]] = None,
     paths: Optional[WebArtifactsPaths] = None,
 ) -> None:
+    # ghi dataset_stats.json
     paths = paths or WebArtifactsPaths.default()
     payload: Dict[str, Any] = {
         "generatedAt": _utc_now_iso(),
@@ -101,6 +107,7 @@ def write_class_distribution(
     *,
     paths: Optional[WebArtifactsPaths] = None,
 ) -> None:
+    # ghi class_distribution.json
     paths = paths or WebArtifactsPaths.default()
     counts_arr = np.asarray(counts).astype(int)
 
@@ -122,6 +129,7 @@ def write_models_index(
     *,
     paths: Optional[WebArtifactsPaths] = None,
 ) -> None:
+    # ghi models.json, có merge với file cũ để không làm mất metrics/hyperparameters đã có
     paths = paths or WebArtifactsPaths.default()
 
     existing_models_by_id: Dict[str, Dict[str, Any]] = {}
@@ -135,7 +143,7 @@ def write_models_index(
                     if isinstance(m, dict) and isinstance(m.get("id"), str):
                         existing_models_by_id[m["id"]] = m
         except Exception:
-            # If file is corrupted, fall back to writing the provided index.
+            # nếu file cũ bị lỗi thì bỏ qua và chỉ ghi index được cung cấp
             existing_models_by_id = {}
 
     merged_models: List[Dict[str, Any]] = []
@@ -148,7 +156,7 @@ def write_models_index(
         prev = existing_models_by_id.get(mid, {})
 
         merged = {**prev, **m}
-        # Never overwrite real values with placeholders.
+        # không ghi đè giá trị thật bằng placeholder (None)
         if m.get("metrics") is None and prev.get("metrics") is not None:
             merged["metrics"] = prev.get("metrics")
         if m.get("hyperparameters") is None and prev.get("hyperparameters") is not None:
@@ -156,7 +164,7 @@ def write_models_index(
 
         merged_models.append(merged)
 
-    # Preserve any extra models that existed previously.
+    # giữ lại các model id khác đã tồn tại trong file cũ
     for mid, prev in existing_models_by_id.items():
         if mid not in seen_ids:
             merged_models.append(prev)
@@ -176,6 +184,7 @@ def write_confusion_matrix(
     normalized: bool = False,
     paths: Optional[WebArtifactsPaths] = None,
 ) -> None:
+    # ghi confusion_matrix.json theo model
     paths = paths or WebArtifactsPaths.default()
     mat = np.asarray(matrix)
     payload = {
@@ -196,6 +205,7 @@ def write_training_history(
     hyperparameters: Optional[Dict[str, Any]] = None,
     paths: Optional[WebArtifactsPaths] = None,
 ) -> None:
+    # ghi training_history.json theo model
     paths = paths or WebArtifactsPaths.default()
     payload = {
         "generatedAt": _utc_now_iso(),
@@ -213,6 +223,7 @@ def write_roc_micro(
     *,
     paths: Optional[WebArtifactsPaths] = None,
 ) -> None:
+    # ghi roc_micro.json
     paths = paths or WebArtifactsPaths.default()
     payload = {
         "generatedAt": _utc_now_iso(),

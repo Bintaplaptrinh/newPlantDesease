@@ -1,14 +1,9 @@
-"""
-Image Preprocessing Module for Plant Disease Detection Pipeline.
-
-This module handles image segmentation using OpenCV techniques including:
-- GrabCut algorithm for foreground extraction
-- Contour detection for leaf boundary extraction
-- Mask generation for background removal
-
-The preprocessing is designed to isolate the leaf from the background,
-improving classification accuracy by removing noise and irrelevant elements.
-"""
+# module tiền xử lí ảnh cho pipeline nhận diện bệnh cây
+# module này xử lí tách nền/lá bằng các kĩ thuật opencv như:
+# - grabcut để tách foreground
+# - tìm contour để lấy biên lá
+# - tạo mask để xoá nền
+# mục tiêu là cô lập vùng lá khỏi nền để giảm nhiễu
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -27,7 +22,7 @@ except ImportError:
 
 @dataclass
 class PreprocessingResult:
-    """Result of image preprocessing."""
+    # kết quả tiền xử lí ảnh
     processed_image: Image.Image
     mask: Optional[np.ndarray] = None
     contour_points: Optional[np.ndarray] = None
@@ -35,15 +30,12 @@ class PreprocessingResult:
 
 
 class ImagePreprocessor:
-    """
-    Image preprocessor using OpenCV for leaf segmentation.
-    
-    Pipeline:
-    1. GrabCut for foreground/background separation
-    2. Mask refinement using morphological operations
-    3. Contour extraction for leaf boundary
-    4. Apply mask to original image
-    """
+    # tiền xử lí ảnh bằng opencv để tách vùng lá
+    # pipeline:
+    # 1) grabcut để tách foreground/background
+    # 2) refine mask bằng phép biến đổi hình thái
+    # 3) lấy contour biên lá
+    # 4) áp mask lên ảnh gốc
 
     DEFAULT_GRABCUT_ITERATIONS = 5
     DEFAULT_MORPH_KERNEL_SIZE = 5
@@ -54,14 +46,10 @@ class ImagePreprocessor:
         morph_kernel_size: int = DEFAULT_MORPH_KERNEL_SIZE,
         use_green_mask: bool = True,
     ):
-        """
-        Initialize the preprocessor.
-        
-        Args:
-            grabcut_iterations: Number of iterations for GrabCut algorithm
-            morph_kernel_size: Kernel size for morphological operations
-            use_green_mask: Whether to use green color masking as additional hint
-        """
+        # khởi tạo preprocessor
+        # grabcut_iterations: số vòng lặp cho grabcut
+        # morph_kernel_size: kích thước kernel cho phép hình thái
+        # use_green_mask: có dùng mask màu xanh làm gợi ý bổ sung hay không
         if not CV2_AVAILABLE:
             raise ImportError(
                 "OpenCV (cv2) is required for image preprocessing. "
@@ -73,14 +61,14 @@ class ImagePreprocessor:
         self.use_green_mask = use_green_mask
 
     def _pil_to_cv2(self, image: Image.Image) -> np.ndarray:
-        """Convert PIL Image to OpenCV BGR format."""
+        # đổi ảnh PIL sang mảng opencv (BGR)
         if image.mode != "RGB":
             image = image.convert("RGB")
         rgb_array = np.array(image)
         return cv2.cvtColor(rgb_array, cv2.COLOR_RGB2BGR)
 
     def _cv2_to_pil(self, image: np.ndarray) -> Image.Image:
-        """Convert OpenCV BGR image to PIL Image."""
+        # đổi mảng opencv (BGR/BGRA) về ảnh PIL
         if len(image.shape) == 3 and image.shape[2] == 3:
             rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         elif len(image.shape) == 3 and image.shape[2] == 4:
@@ -91,10 +79,8 @@ class ImagePreprocessor:
         return Image.fromarray(rgb)
 
     def _create_initial_mask_from_green(self, image_bgr: np.ndarray) -> np.ndarray:
-        """
-        Create an initial mask based on green color detection.
-        Plants/leaves are typically green, so this helps GrabCut.
-        """
+        # tạo mask khởi tạo dựa trên màu xanh
+        # lá cây thường xanh (và có thể vàng/nâu khi bệnh), giúp grabcut hội tụ tốt hơn
         hsv = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2HSV)
         
         # Green color range in HSV
@@ -128,17 +114,8 @@ class ImagePreprocessor:
         initial_mask: Optional[np.ndarray] = None,
         rect: Optional[Tuple[int, int, int, int]] = None,
     ) -> np.ndarray:
-        """
-        Apply GrabCut algorithm for foreground extraction.
-        
-        Args:
-            image_bgr: Input image in BGR format
-            initial_mask: Optional initial mask (from green color detection)
-            rect: Optional bounding rectangle (x, y, w, h)
-            
-        Returns:
-            Binary mask where foreground is 255, background is 0
-        """
+        # chạy grabcut để tách foreground
+        # trả về binary mask: foreground=255, background=0
         h, w = image_bgr.shape[:2]
         
         # Initialize GrabCut mask
@@ -199,7 +176,7 @@ class ImagePreprocessor:
         return binary_mask
 
     def _refine_mask(self, mask: np.ndarray) -> np.ndarray:
-        """Refine mask using morphological operations."""
+        # refine mask bằng phép biến đổi hình thái
         kernel = cv2.getStructuringElement(
             cv2.MORPH_ELLIPSE,
             (self.morph_kernel_size, self.morph_kernel_size)
@@ -214,7 +191,7 @@ class ImagePreprocessor:
         return refined
 
     def _find_largest_contour(self, mask: np.ndarray) -> Optional[np.ndarray]:
-        """Find the largest contour in the mask."""
+        # tìm contour lớn nhất trong mask
         contours, _ = cv2.findContours(
             mask, 
             cv2.RETR_EXTERNAL, 
@@ -234,7 +211,7 @@ class ImagePreprocessor:
         mask: np.ndarray,
         fill_color: Tuple[int, int, int] = (255, 255, 255)
     ) -> np.ndarray:
-        """Apply mask to image, filling background with specified color."""
+        # áp mask lên ảnh, vùng nền sẽ được fill bằng màu chỉ định
         # Create output image with fill color
         result = np.full_like(image_bgr, fill_color)
         
@@ -249,25 +226,14 @@ class ImagePreprocessor:
         apply_mask: bool = True,
         fill_background: Tuple[int, int, int] = (255, 255, 255),
     ) -> PreprocessingResult:
-        """
-        Apply full preprocessing pipeline to segment the leaf.
-        
-        Pipeline:
-        1. Convert to OpenCV format
-        2. Create initial mask from green color detection
-        3. Apply GrabCut for refined segmentation
-        4. Refine mask with morphological operations
-        5. Find largest contour (the leaf)
-        6. Apply mask to original image
-        
-        Args:
-            image: Input PIL Image
-            apply_mask: Whether to apply the mask to the image
-            fill_background: Background color (BGR) when mask is applied
-            
-        Returns:
-            PreprocessingResult with processed image and metadata
-        """
+        # chạy full pipeline để tách vùng lá
+        # các bước:
+        # 1) chuyển sang opencv
+        # 2) tạo mask khởi tạo theo màu
+        # 3) chạy grabcut
+        # 4) refine mask
+        # 5) tìm contour lớn nhất (giả định là lá)
+        # 6) áp mask lên ảnh gốc
         image_bgr = self._pil_to_cv2(image)
         
         # Step 1: Create initial mask from color
@@ -318,16 +284,8 @@ class ImagePreprocessor:
         image: Image.Image,
         return_with_transparent_bg: bool = False
     ) -> Image.Image:
-        """
-        Simplified method to segment leaf and return the result.
-        
-        Args:
-            image: Input PIL Image
-            return_with_transparent_bg: If True, return RGBA with transparent background
-            
-        Returns:
-            Processed PIL Image
-        """
+        # hàm gọn để tách lá và trả về ảnh kết quả
+        # return_with_transparent_bg=True sẽ trả RGBA với nền trong suốt
         result = self.preprocess(image, apply_mask=True)
         
         if return_with_transparent_bg and result.mask is not None:
@@ -345,7 +303,7 @@ def create_preprocessor(
     morph_kernel_size: int = 5,
     use_green_mask: bool = True,
 ) -> ImagePreprocessor:
-    """Factory function to create an ImagePreprocessor."""
+    # factory để tạo ImagePreprocessor
     return ImagePreprocessor(
         grabcut_iterations=grabcut_iterations,
         morph_kernel_size=morph_kernel_size,

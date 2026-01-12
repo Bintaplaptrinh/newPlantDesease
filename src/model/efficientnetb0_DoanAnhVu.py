@@ -1,3 +1,5 @@
+# script train efficientnet-b0 (chủ yếu dùng để tái train/ghi ra .pth)
+
 import os
 from dataclasses import dataclass
 from typing import Dict
@@ -19,14 +21,14 @@ class TrainConfig:
 
 
 def build_model(num_classes: int, device: str):
-    # EfficientNet-B0
+    # efficientnet-b0 (pretrained imagenet)
     model = models.efficientnet_b0(weights="IMAGENET1K_V1")
     model.classifier[1] = nn.Linear(model.classifier[1].in_features, num_classes)
     return model.to(device)
 
 
 def load_model(path: str, num_classes: int, device: str):
-    # Load from disk if exists, else build fresh
+    # load từ disk nếu có, nếu không thì build mới
     if os.path.exists(path):
         m = torch.load(path, weights_only=False, map_location=device)
         m = m.to(device)
@@ -36,7 +38,7 @@ def load_model(path: str, num_classes: int, device: str):
 
 
 def load_pth(path: str, device: str):
-    # Load trained model from .pth
+    # load model đã train từ file .pth
     m = torch.load(path, weights_only=False, map_location=device)
     m = m.to(device)
     m.eval()
@@ -44,7 +46,7 @@ def load_pth(path: str, device: str):
 
 
 def train(model, train_loader, valid_loader, device: str, config: TrainConfig, criterion, scaler, save_path: str = "efficientnet.pth"):
-    # Train only classifier
+    # chỉ train phần classifier
     for p in model.parameters():
         p.requires_grad = False
     for p in model.classifier.parameters():
@@ -138,7 +140,7 @@ def train_pipeline(
     image_size: int = 224,
     device: str | None = None,
 ):
-    # Download + merge dataset, then train EfficientNetB0
+    # download + gộp dataset, sau đó train efficientnetb0
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 

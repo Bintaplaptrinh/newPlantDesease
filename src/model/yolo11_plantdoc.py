@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+# script finetune yolo trên dataset plantdoc
+# file này yêu cầu ultralytics + yaml, và dataset yaml đúng đường dẫn
+
 import argparse
 import shutil
 from pathlib import Path
@@ -10,13 +13,15 @@ from ultralytics import YOLO
 
 def _best_effort_fix_data_yaml(data_yaml: Path) -> Path:
 
+    # cố gắng sửa data.yaml để ultralytics đọc được (đường dẫn train/val/test)
+
     dataset_root = data_yaml.parent.resolve()
 
     with data_yaml.open("r", encoding="utf-8") as f:
         cfg = yaml.safe_load(f) or {}
 
     def resolve_split(value: str) -> Path:
-        # Resolve relative to YAML directory, normalizing '..'
+        # resolve path tương đối theo thư mục yaml, và normalize '..'
         return (dataset_root / Path(value)).resolve()
 
     def pick_existing(candidates: list[str]) -> str | None:
@@ -25,17 +30,17 @@ def _best_effort_fix_data_yaml(data_yaml: Path) -> Path:
                 continue
             p = resolve_split(c)
             if p.exists():
-                # Store as path relative to dataset_root when possible
+                # ưu tiên lưu path tương đối theo dataset_root
                 try:
                     return str(p.relative_to(dataset_root)).replace("\\", "/")
                 except Exception:
                     return str(p).replace("\\", "/")
         return None
 
-    # Ensure base path is the dataset root.
+    # đảm bảo base path là dataset_root
     cfg["path"] = str(dataset_root).replace("\\", "/")
 
-    # Train images folder must exist.
+    # folder train phải tồn tại
     train_value = cfg.get("train", "train/images")
     train_fixed = pick_existing([
         str(train_value),
@@ -50,14 +55,14 @@ def _best_effort_fix_data_yaml(data_yaml: Path) -> Path:
         )
     cfg["train"] = train_fixed
 
-    # Validation: prefer valid/ or val/, else fall back to test/images.
+    # val: ưu tiên valid/ hoặc val/, nếu không có thì fallback test/images
     val_value = cfg.get("val")
     val_fixed = pick_existing([
         str(val_value) if isinstance(val_value, str) else None,
         "valid/images",
         "val/images",
         "validation/images",
-        "test/images",  # fallback when no valid split exists
+        "test/images",  # fallback khi không có split valid
     ])
     if not val_fixed:
         raise FileNotFoundError(
@@ -66,7 +71,7 @@ def _best_effort_fix_data_yaml(data_yaml: Path) -> Path:
         )
     cfg["val"] = val_fixed
 
-    # Optional test split.
+    # test split là tuỳ chọn
     test_value = cfg.get("test")
     test_fixed = pick_existing([
         str(test_value) if isinstance(test_value, str) else None,
@@ -85,6 +90,7 @@ def _best_effort_fix_data_yaml(data_yaml: Path) -> Path:
 
 
 def main() -> int:
+    # train yolo và copy weight best/last ra file out
     out = "yolo11n_finetune.pt"
 
     data_yaml = Path("PlantDoc-1/data.yaml").expanduser().resolve()
@@ -100,11 +106,11 @@ def main() -> int:
         epochs=50,
         imgsz=640,
         batch=16,
-        device= "0", #use "0" for GPU 
+        device= "0", # dùng "0" nếu muốn chạy gpu
         lr0=0.01,
         patience=20,
-        verbose=True,  # progress in console
-        plots=False,   # keep minimal output artifacts
+        verbose=True,  # in progress ra console
+        plots=False,   # hạn chế artifact không cần thiết
         save=True,
         val=True,
         pretrained=True,

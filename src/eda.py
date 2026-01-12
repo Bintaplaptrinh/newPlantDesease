@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 
 def count_per_class_from_imagefolder_samples(samples: List[Tuple[str, int]], class_names: List[str]) -> pd.DataFrame:
-    # Counts images per class
+    # đếm số lượng ảnh theo từng class
     labels = [label for _, label in samples]
     labels_count = Counter(labels)
     class_count: Dict[str, int] = {class_names[k]: v for k, v in labels_count.items()}
@@ -19,7 +19,7 @@ def count_per_class_from_imagefolder_samples(samples: List[Tuple[str, int]], cla
 
 
 def plot_class_distribution(df_count: pd.DataFrame, title: str = "Biểu đồ số lượng ảnh theo từng lớp"):
-    # Build class distribution figure (no plt.show)
+    # tạo figure phân bố số lượng ảnh theo lớp (không gọi plt.show)
     fig, ax = plt.subplots(figsize=(16, 7))
     bars = ax.bar(df_count["Class"], df_count["num_classes"])
 
@@ -43,7 +43,7 @@ def plot_class_distribution(df_count: pd.DataFrame, title: str = "Biểu đồ s
 
 
 def is_over_bright(img_path: str, thresh: float = 0.85):
-    # Simple brightness check on HSV-V channel
+    # check độ sáng đơn giản dựa trên kênh v của hsv
     img = cv2.imread(img_path)
     if img is None:
         return False, 0.0
@@ -56,7 +56,7 @@ def is_over_bright(img_path: str, thresh: float = 0.85):
 
 
 def over_bright_report(samples: List[Tuple[str, int]], class_names: List[str], class_count: Dict[str, int], thresh: float = 0.85) -> pd.DataFrame:
-    # Computes over-bright ratio per class
+    # tính tỉ lệ ảnh quá sáng theo từng class
     over_count = Counter()
 
     for img_path, label in tqdm(samples):
@@ -79,7 +79,7 @@ def over_bright_report(samples: List[Tuple[str, int]], class_names: List[str], c
 
 
 def plot_over_bright_ratio(df_over: pd.DataFrame, title: str = "Tỷ lệ ảnh quá sáng theo từng lớp"):
-    # Build over-bright ratio figure (no plt.show)
+    # tạo figure tỉ lệ ảnh quá sáng (không gọi plt.show)
     x = df_over["Class"]
     y = df_over["Ratio"]
 

@@ -1,3 +1,5 @@
+# các hàm đánh giá model: confusion matrix, classification report, roc micro (ovr)
+
 import os
 from typing import Dict, List, Tuple
 
@@ -13,7 +15,7 @@ from sklearn.preprocessing import label_binarize
 
 
 def maybe_load_model(path: str, fallback_model: torch.nn.Module, device: str):
-    # Load saved model if exists
+    # load model đã lưu nếu có, nếu không thì dùng fallback_model
     if os.path.exists(path):
         m = torch.load(path, weights_only=False, map_location=device)
         m = m.to(device)
@@ -25,7 +27,7 @@ def maybe_load_model(path: str, fallback_model: torch.nn.Module, device: str):
 
 @torch.no_grad()
 def predict_logits_and_targets(model: torch.nn.Module, loader, device: str):
-    # Predict logits + collect targets
+    # chạy infer để lấy logits và gom targets
     model.eval()
     all_logits = []
     all_targets = []
@@ -41,7 +43,7 @@ def predict_logits_and_targets(model: torch.nn.Module, loader, device: str):
 
 
 def per_class_accuracy_from_cm(cm: np.ndarray, class_names: List[str]) -> pd.DataFrame:
-    # Compute per-class accuracy from confusion matrix
+    # tính accuracy theo từng class từ confusion matrix
     support = cm.sum(axis=1)
     correct = np.diag(cm)
     acc = np.divide(correct, support, out=np.zeros_like(correct, dtype=float), where=support != 0)
@@ -49,7 +51,7 @@ def per_class_accuracy_from_cm(cm: np.ndarray, class_names: List[str]) -> pd.Dat
 
 
 def plot_confusion_matrix(cm: np.ndarray, class_names: List[str], title: str, normalize: bool = True):
-    # Build confusion matrix figure (no plt.show)
+    # tạo figure confusion matrix (không gọi plt.show)
     if normalize:
         row_sum = cm.sum(axis=1, keepdims=True)
         cm_plot = np.divide(cm, row_sum, out=np.zeros_like(cm, dtype=float), where=row_sum != 0)
@@ -74,7 +76,7 @@ def plot_confusion_matrix(cm: np.ndarray, class_names: List[str], title: str, no
 
 
 def evaluate_one_model(name: str, model: torch.nn.Module, loader, device: str, class_names: List[str], num_classes: int, return_figures: bool = True):
-    # Compute metrics for web (no print, no plt.show)
+    # tính metrics để export cho web (không print, không plt.show)
     logits, y_true = predict_logits_and_targets(model, loader, device)
     y_prob = F.softmax(torch.from_numpy(logits), dim=1).numpy()
     y_pred = logits.argmax(axis=1)
@@ -114,7 +116,7 @@ def evaluate_one_model(name: str, model: torch.nn.Module, loader, device: str, c
 
 
 def plot_roc_micro_ovr(results: Dict[str, dict], num_classes: int, title: str = "ROC Curve Comparison (micro-average, OvR)"):
-    # Build ROC figure (no plt.show)
+    # tạo figure roc (không gọi plt.show)
     fig, ax = plt.subplots(figsize=(7, 6))
     aucs: Dict[str, Dict[str, float]] = {}
 

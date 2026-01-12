@@ -1,0 +1,729 @@
+\documentclass[a4paper, 12pt]{extarticle}
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{mathptmx}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{tikz}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{indentfirst}
+\usepackage{pgfplots}
+\usepackage{amsmath}
+\pgfplotsset{compat=1.18}
+
+% Colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\definecolor{linepage}{HTML}{1D32B1}
+
+% Geometry
+\geometry{top=3.5cm, bottom=3cm, left=3.5cm, right=2cm}
+\hypersetup{colorlinks=false, pdfborder={0 0 0}}
+\onehalfspacing
+
+% Listings
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    numbers=left,
+    numbersep=5pt,
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\lstdefinelanguage{yaml}{
+  keywords={true,false,null,y,n},
+  keywordstyle=\color{darkgray}\bfseries,
+  basicstyle=\ttfamily\footnotesize,
+  sensitive=false,
+  comment=[l]{\#},
+  morecomment=[s]{/*}{*/},
+  commentstyle=\color{purple}\ttfamily,
+  stringstyle=\color{blue}\ttfamily,
+  morestring=[b]',
+  morestring=[b]"
+}
+
+% Header/Footer
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% Titles
+\titleformat{\section}{\normalfont\Large\bfseries\centering}{CHƯƠNG \thesection.}{1em}{}
+\titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection.}{1em}{}
+\titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection.}{1em}{}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+\vspace*{1cm}
+\textbf{\Large BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\[0.5cm]
+\textbf{\Large TRƯỜNG ĐẠI HỌC THỦY LỢI - PHÂN HIỆU MIỀN NAM}\\[0.5cm]
+\textbf{\Large KHOA CÔNG NGHỆ THÔNG TIN}\\[2cm]
+
+\IfFileExists{Logo-dhtl.png}{\includegraphics[width=4cm]{Logo-dhtl.png}}{\vspace{3cm}}
+
+\vspace{0.5cm}
+\textbf{\Large ĐỒ ÁN MÔN HỌC}\\[0.5cm]
+\textbf{TÊN ĐỀ TÀI:}\\
+\textbf{\Large HỆ THỐNG PHÂN LOẠI BỆNH HẠI TRÊN LÁ CÂY}\\[1.5cm]
+
+\begin{tabular}{>{\raggedright}p{5cm} p{5cm}}
+\textbf{Giảng viên hướng dẫn:} & Giảng viên Vũ Thị Hạnh \\
+\textbf{Sinh viên thực hiện:} & Phạm Thị Quỳnh Giao \newline Nguyễn Hữu Tuấn Phát \newline Đoàn Anh Vũ \\
+\textbf{MSSV:} & 2351267259 \newline 2351267274 \newline 2351267280 \\
+\textbf{Lớp:} & S26-65TTNT
+\end{tabular}
+\vfill
+\textbf{TP. HỒ CHÍ MINH, 2026}
+\end{center}
+\end{titlepage}
+
+% --- FRONT MATTER ---
+\newpage
+\tableofcontents
+\newpage
+\listoftables
+\addcontentsline{toc}{section}{DANH MỤC BẢNG}
+\newpage
+\listoffigures
+\addcontentsline{toc}{section}{DANH MỤC HÌNH VẼ}
+
+\newpage
+\section*{DANH MỤC KÝ HIỆU VIẾT TẮT}
+\addcontentsline{toc}{section}{DANH MỤC KÝ HIỆU VIẾT TẮT}
+\begin{center}
+\begin{tabular}{l p{10cm}}
+\textbf{CNN} & Convolutional Neural Network (Mạng nơ-ron tích chập) \\
+\textbf{DL} & Deep Learning (Học sâu) \\
+\textbf{Img} & Image (Hình ảnh) \\
+\textbf{AUC} & Area Under the Curve \\
+\textbf{ROC} & Receiver Operating Characteristic \\
+\textbf{RGB} & Red-Green-Blue (Không gian màu) \\
+\textbf{API} & Application Programming Interface \\
+\textbf{JSON} & JavaScript Object Notation \\
+\end{tabular}
+\end{center}
+
+\newpage
+\section*{LỜI CẢM ƠN}
+\addcontentsline{toc}{section}{LỜI CẢM ƠN}
+Trong suốt quá trình học tập và thực hiện bài tập kết thúc môn Quản lý dữ liệu lớn, chúng tôi đã nhận được rất nhiều sự quan tâm, chỉ dẫn và hỗ trợ quý báu từ các thầy cô trong Phân hiệu Trường Đại học Thủy Lợi. Đây là nền tảng quan trọng giúp chúng tôi có thể tiếp thu, rèn luyện và vận dụng kiến thức vào thực tế, từ đó hoàn thành được bài tập này.
+
+Đặc biệt, chúng tôi xin gửi lời cảm ơn sâu sắc đến Cô Vũ Thị Hạnh – giảng viên trực tiếp giảng dạy và hướng dẫn môn học. Cô không chỉ truyền đạt những kiến thức chuyên môn một cách rõ ràng, dễ hiểu mà còn tận tình giải đáp thắc mắc, định hướng phương pháp tiếp cận vấn đề, cũng như chia sẻ nhiều kinh nghiệm thực tiễn quý giá. Chính sự tận tâm và nhiệt huyết của Cô đã giúp chúng tôi có thêm động lực, sự tự tin và tinh thần trách nhiệm trong quá trình nghiên cứu và hoàn thiện bài tập.
+
+Chúng tôi cũng xin cảm ơn Phân hiệu Trường Đại học Thủy Lợi đã cung cấp môi trường học tập và các cơ sở vật chất cần thiết. Xin cảm ơn tập thể lớp S26-65TTNT đã luôn đồng hành, chia sẻ và giúp đỡ lẫn nhau.
+
+Mặc dù đã rất cố gắng, nhưng do hạn chế về thời gian và kiến thức, đồ án khó tránh khỏi những thiếu sót. Chúng tôi rất mong nhận được sự đóng góp ý kiến từ Cô và các bạn.
+\vspace{1cm}
+\begin{flushright}
+TP. Hồ Chí Minh, ngày 12 tháng 01 năm 2026\\
+Trân trọng
+\end{flushright}
+
+% --- CHƯƠNG 1 ---
+\newpage
+\section{GIỚI THIỆU ĐỀ TÀI}
+
+Nông nghiệp đóng vai trò then chốt trong nền kinh tế, tuy nhiên, năng suất cây trồng thường xuyên bị ảnh hưởng nghiêm trọng bởi các loại dịch bệnh. Việc phát hiện sớm bệnh hại bằng mắt thường đòi hỏi kinh nghiệm chuyên môn cao và tốn nhiều nhân lực. Với sự phát triển của Trí tuệ nhân tạo (AI), đặc biệt là Deep Learning, việc tự động hóa quy trình chẩn đoán bệnh qua hình ảnh lá cây đang trở thành một giải pháp cấp thiết và hiệu quả.
+
+Dự án này tập trung nghiên cứu và xây dựng hệ thống phân loại bệnh hại trên lá cây sử dụng các kiến trúc CNN hiện đại, tích hợp vào ứng dụng Web đóng gói bằng Docker để hỗ trợ thực tế cho người nông dân.
+
+% --- CHƯƠNG 2 ---
+\newpage
+\section{MỤC TIÊU VÀ BÀI TOÁN ĐẶT RA}
+
+\subsection{Bài Toán (Problem Definition)}
+Phân loại hình ảnh (Image Classification) là bài toán gán nhãn cho một hình ảnh đầu vào vào một trong các lớp (classes) được định nghĩa trước. Trong ngữ cảnh này, đầu vào là ảnh chụp lá cây (có thể khỏe mạnh hoặc bị bệnh), và đầu ra là tên loại bệnh hoặc trạng thái "Healthy".
+
+Thách thức chính bao gồm:
+\begin{itemize}
+    \item Sự đa dạng về điều kiện ánh sáng, góc chụp.
+    \item Sự tương đồng giữa các triệu chứng bệnh khác nhau trên cùng loại cây.
+    \item Nhiễu nền (background noise) trong ảnh thực tế.
+\end{itemize}
+
+\subsection{Các Chỉ Số Đánh Giá (Evaluation Metrics)}
+Để đánh giá hiệu quả của các mô hình phân loại, chúng tôi sử dụng tập hợp các chỉ số đo lường tiêu chuẩn sau đây:
+
+\subsubsection{Accuracy (Độ Chính Xác)}
+Là tỷ lệ giữa số lượng mẫu dự đoán đúng trên tổng số mẫu.
+\begin{equation}
+    Accuracy = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+Trong đó:
+\begin{itemize}
+    \item $TP$: True Positive (Dương tính thật)
+    \item $TN$: True Negative (Âm tính thật)
+    \item $FP$: False Positive (Dương tính giả - Báo nhầm)
+    \item $FN$: False Negative (Âm tính giả - Bỏ sót bệnh)
+\end{itemize}
+
+\subsubsection{Precision (Độ Chính Xác Của Dự Đoán Dương)}
+Đo lường mức độ tin cậy khi mô hình dự báo một mẫu là "Có bệnh".
+\begin{equation}
+    Precision = \frac{TP}{TP + FP}
+\end{equation}
+
+\subsubsection{Recall (Độ Nhạy / Tỷ Lệ Phát Hiện)}
+Đo lường khả năng phát hiện tất cả các ca bệnh thực tế trong tập dữ liệu (tránh bỏ sót).
+\begin{equation}
+    Recall = \frac{TP}{TP + FN}
+\end{equation}
+
+\subsubsection{F1-Score}
+Là trung bình điều hòa giữa Precision và Recall, dùng để đánh giá tổng quát khi dữ liệu bị mất cân bằng.
+\begin{equation}
+    F1\text{-}Score = 2 \times \frac{Precision \times Recall}{Precision + Recall}
+\end{equation}
+
+\subsubsection{AUC - ROC}
+\begin{itemize}
+    \item \textbf{ROC (Receiver Operating Characteristic):} Đường cong biểu diễn mối quan hệ giữa True Positive Rate (TPR = Recall) và False Positive Rate ($FPR = FP / (FP + TN)$) tại các ngưỡng (threshold) phân loại khác nhau.
+    \item \textbf{AUC (Area Under Curve):} Diện tích dưới đường cong ROC. Giá trị AUC càng gần 1 thì mô hình càng có khả năng phân biệt tốt giữa các lớp.
+\end{itemize}
+
+% --- CHƯƠNG 3 ---
+\newpage
+\section{MÔ TẢ DỮ LIỆU VÀ CÁC BƯỚC TIỀN XỬ LÝ}
+
+\subsection{Bộ Dữ Liệu New Plant Diseases Dataset}
+
+\subsubsection{Tổng Quan Dữ Liệu}
+Chúng tôi sử dụng bộ dữ liệu **New Plant Diseases Dataset**, một phiên bản mở rộng và chuẩn hóa từ PlantVillage. Đây là bộ dữ liệu tiêu chuẩn cho các bài toán nông nghiệp thông minh.
+
+\begin{table}[H]
+\centering
+\caption{Thống kê chi tiết bộ dữ liệu}
+\begin{tabular}{|l|l|}
+\hline
+\textbf{Đặc điểm} & \textbf{Thông số} \\ \hline
+Tổng số ảnh & 87,867 ảnh \\ \hline
+Dữ liệu huấn luyện (Train) & 70,295 ảnh \\ \hline
+Dữ liệu kiểm thử (Validation) & 17,572 ảnh\\ \hline
+Số lượng lớp (Classes) & 38 lớp (Gồm 14 loài cây) \\ \hline
+Định dạng ảnh & JPG, RGB \\ \hline
+Kích thước gốc & 256 $\times$ 256 pixels \\ \hline
+\end{tabular}
+\end{table}
+
+Bộ dữ liệu bao gồm cả ảnh chụp trong điều kiện phòng thí nghiệm (nền xám/đơn sắc) và ảnh chụp thực tế (nền tự nhiên), giúp mô hình có khả năng tổng quát hóa tốt hơn.
+
+\subsubsection{Danh Sách Các Lớp Dữ Liệu}
+Dưới đây là danh sách chi tiết 38 lớp bệnh hại tương ứng với 14 loại cây trồng. Việc hiểu rõ từng lớp giúp chúng tôi thiết kế mô hình chính xác hơn.
+
+\begin{longtable}{|c|l|l|}
+\caption{Danh sách đầy đủ 38 lớp bệnh hại} \label{tab:classes} \\
+\hline \textbf{STT} & \textbf{Tên Lớp (Tiếng Anh)} & \textbf{Mô Tả Tiếng Việt} \\ \hline
+\endfirsthead
+\hline \textbf{STT} & \textbf{Tên Lớp (Tiếng Anh)} & \textbf{Mô Tả Tiếng Việt} \\ \hline
+\endhead
+1 & Apple\_\_\_Apple\_scab & Táo: Bệnh ghẻ, đốm đen trên lá và quả \\
+2 & Apple\_\_\_Black\_rot & Táo: Bệnh thối đen, đốm vòng nâu \\
+3 & Apple\_\_\_Cedar\_apple\_rust & Táo: Bệnh rỉ sắt, đốm cam đỏ \\
+4 & Apple\_\_\_healthy & Táo: Lá khỏe mạnh \\
+5 & Blueberry\_\_\_healthy & Việt quất: Lá khỏe mạnh \\
+6 & Cherry\_\_\_Powdery\_mildew & Anh đào: Bệnh phấn trắng \\
+7 & Cherry\_\_\_healthy & Anh đào: Lá khỏe mạnh \\
+8 & Corn\_\_\_Cercospora\_leaf\_spot & Ngô: Đốm lá xám, vệt dài dọc gân \\
+9 & Corn\_\_\_Common\_rust & Ngô: Bệnh rỉ sắt thường \\
+10 & Corn\_\_\_Northern\_Leaf\_Blight & Ngô: Cháy lá phương Bắc \\
+11 & Corn\_\_\_healthy & Ngô: Lá khỏe mạnh \\
+12 & Grape\_\_\_Black\_rot & Nho: Thối đen, vết hoại tử \\
+13 & Grape\_\_\_Esca & Nho: Bệnh sởi đen, lá vằn hổ \\
+14 & Grape\_\_\_Leaf\_blight & Nho: Cháy lá đốm tròn \\
+15 & Grape\_\_\_healthy & Nho: Lá khỏe mạnh \\
+16 & Orange\_\_\_Haunglongbing & Cam: Bệnh vàng lá gân xanh (Citrus Greening) \\
+17 & Peach\_\_\_Bacterial\_spot & Đào: Đốm vi khuẩn, lỗ thủng trên lá \\
+18 & Peach\_\_\_healthy & Đào: Lá khỏe mạnh \\
+19 & Pepper,\_bell\_\_\_Bacterial\_spot & Ớt chuông: Đốm vi khuẩn \\
+20 & Pepper,\_bell\_\_\_healthy & Ớt chuông: Lá khỏe mạnh \\
+21 & Potato\_\_\_Early\_blight & Khoai tây: Đốm vòng (sớm) \\
+22 & Potato\_\_\_Late\_blight & Khoai tây: Sương mai (muộn), mốc trắng \\
+23 & Potato\_\_\_healthy & Khoai tây: Lá khỏe mạnh \\
+24 & Raspberry\_\_\_healthy & Mâm xôi: Lá khỏe mạnh \\
+25 & Soybean\_\_\_healthy & Đậu nành: Lá khỏe mạnh \\
+26 & Squash\_\_\_Powdery\_mildew & Bí: Phấn trắng phủ đầy mặt lá \\
+27 & Strawberry\_\_\_Leaf\_scorch & Dâu tây: Cháy lá, mép lá khô \\
+28 & Strawberry\_\_\_healthy & Dâu tây: Lá khỏe mạnh \\
+29 & Tomato\_\_\_Bacterial\_spot & Cà chua: Đốm vi khuẩn \\
+30 & Tomato\_\_\_Early\_blight & Cà chua: Đốm vòng sớm \\
+31 & Tomato\_\_\_Late\_blight & Cà chua: Sương mai muộn, bệnh nguy hiểm \\
+32 & Tomato\_\_\_Leaf\_Mold & Cà chua: Nấm mốc lá, đốm vàng mặt trên \\
+33 & Tomato\_\_\_Septoria\_leaf\_spot & Cà chua: Đốm mắt ếch Septoria \\
+34 & Tomato\_\_\_Spider\_mites & Cà chua: Nhện đỏ, lá lốm đốm vàng nhỏ \\
+35 & Tomato\_\_\_Target\_Spot & Cà chua: Đốm đích (hình bia bắn) \\
+36 & Tomato\_\_\_YLCV & Cà chua: Virus xoăn vàng lá \\
+37 & Tomato\_\_\_Mosaic\_virus & Cà chua: Virus khảm, lá loang lổ xanh vàng \\
+38 & Tomato\_\_\_healthy & Cà chua: Lá khỏe mạnh \\
+\hline
+\end{longtable}
+
+\subsubsection{Hình Ảnh Minh Họa Các Lớp Bệnh}
+Dưới đây là một số hình ảnh thực tế trích xuất từ tập dữ liệu dùng để huấn luyện, minh họa sự đa dạng về hình thái bệnh.
+
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{photo/apple_black_rot.jpg}
+        \caption*{Apple Black Rot}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{photo/grape_black_rot.jpg}
+        \caption*{Grape Black Rot}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{photo/tomato_bacterial_spot.jpg}
+        \caption*{Tomato Bact. Spot}
+    \end{minipage}
+    
+    \vspace{0.5cm}
+    
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{photo/corn_northern_leaf_blight.jpg}
+        \caption*{Corn N. Leaf Blight}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{photo/peach_bacterial_spot.jpg}
+        \caption*{Peach Bact. Spot}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.3\textwidth}
+        \centering
+        \includegraphics[width=0.9\linewidth]{photo/tomato_mosaic_virus.jpg}
+        \caption*{Tomato Mosaic Virus}
+    \end{minipage}
+    \caption{Hình ảnh minh họa các loại bệnh trong tập dữ liệu (Nguồn: Kaggle)}
+    \label{fig:dataset_samples}
+\end{figure}
+
+Từ Hình \ref{fig:dataset_samples}, ta thấy rằng các bệnh như \textit{Black Rot} hay \textit{Bacterial Spot} có các đốm hoại tử đặc trưng, trong khi \textit{Mosaic Virus} tạo ra các mảng màu loang lổ. Mô hình CNN sẽ học các đặc trưng cục bộ (texture, shape) này để phân loại.
+
+\subsection{Các Bước Tiền Xử Lý (Image Preprocessing)}
+
+\subsubsection{Chi Tiết Các Kỹ Thuật Augmentation}
+
+Dưới đây là mô tả chi tiết và mã nguồn thực thi cho từng kỹ thuật augmentation được sử dụng trong pipeline.
+
+\paragraph{1. RandomResizedCrop}
+\begin{lstlisting}[language=Python]
+transforms.RandomResizedCrop(image_size, scale=(0.6, 1.0), ratio=(0.75, 1.3333))
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Mục đích:} Cắt ngẫu nhiên một vùng từ 60\% đến 100\% diện tích ảnh gốc, sau đó resize về kích thước chuẩn 224x224 pixels.
+    \item \textbf{Lý do:} Giúp tăng tính đa dạng dữ liệu bằng cách mô phỏng các khoảng cách chụp khác nhau (xa/gần) và các khung hình khác nhau (tỷ lệ 3:4 đến 4:3).
+\end{itemize}
+
+\paragraph{2. RandomHorizontalFlip}
+\begin{lstlisting}[language=Python]
+transforms.RandomHorizontalFlip(p=0.5)
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Mục đích:} Lật ngang ảnh ngẫu nhiên với xác suất 50\%.
+    \item \textbf{Lý do:} Lá cây có tính đối xứng trục và vết bệnh có thể xuất hiện bất kỳ đâu.
+\end{itemize}
+
+\paragraph{3. ColorJitter}
+\begin{lstlisting}[language=Python]
+transforms.RandomApply(
+    [transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.25, hue=0.02)],
+    p=0.8,
+)
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Mục đích:} Thay đổi ngẫu nhiên độ sáng ($\pm$40\%), độ tương phản ($\pm$40\%), độ bão hòa ($\pm$25\%) và sắc thái màu ($\pm$2\%).
+    \item \textbf{Lý do:} Mô phỏng các điều kiện ánh sáng thực tế khác nhau (nắng gắt, bóng râm, trời u ám).
+\end{itemize}
+
+\paragraph{4. GaussianBlur}
+\begin{lstlisting}[language=Python]
+transforms.RandomApply(
+    [transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 2.0))],
+    p=0.3,
+)
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Mục đích:} Làm mờ ảnh ngẫu nhiên với xác suất 30\%.
+    \item \textbf{Lý do:} Mô phỏng hiện tượng ảnh bị mất nét do rung tay hoặc lấy nét sai.
+\end{itemize}
+
+\paragraph{5. RandomPerspective}
+\begin{lstlisting}[language=Python]
+transforms.RandomPerspective(distortion_scale=0.25, p=0.2)
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Mục đích:} Biến đổi phối cảnh ngẫu nhiên với xác suất 20\%.
+    \item \textbf{Lý do:} Mô phỏng ảnh chụp từ các góc độ nghiêng khác nhau.
+\end{itemize}
+
+\paragraph{6. RandAugment}
+\begin{lstlisting}[language=Python]
+transforms.RandAugment(num_ops=2, magnitude=9)
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Mục đích:} Áp dụng ngẫu nhiên 2 phép biến đổi từ tập 14 phép biến đổi tiêu chuẩn với cường độ 9/10.
+\end{itemize}
+
+\paragraph{7. Normalization (ImageNet Statistics)}
+\begin{lstlisting}[language=Python]
+transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Công thức:} $Normalized\_pixel = (pixel - mean) / std$
+    \item \textbf{Lý do:} Chuẩn hóa dữ liệu đầu vào theo phân phối ImageNet để phù hợp với Pre-trained weights.
+\end{itemize}
+
+\paragraph{8. RandomErasing}
+\begin{lstlisting}[language=Python]
+transforms.RandomErasing(p=0.25, scale=(0.02, 0.15), ratio=(0.3, 3.3), value="random")
+\end{lstlisting}
+\begin{itemize}
+    \item \textbf{Mục đích:} Xóa ngẫu nhiên một vùng hình chữ nhật trong ảnh.
+    \item \textbf{Lý do:} Giúp mô hình học cách nhận diện bệnh dựa trên bối cảnh toàn cục.
+\end{itemize}
+
+\subsubsection{Validation Transform}
+Đối với tập kiểm thử (Validation), chúng tôi không áp dụng các phép biến đổi ngẫu nhiên để đảm bảo tính nhất quán khi đánh giá.
+\begin{lstlisting}[language=Python]
+val_transform = transforms.Compose([
+    transforms.Resize(256),
+    transforms.CenterCrop(image_size),  # 224x224
+    transforms.ToTensor(),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+])
+\end{lstlisting}
+
+\subsection{Phương Pháp Data Injection (Bổ Sung Dữ Liệu)}
+Một điểm sáng tạo trong đồ án này là việc sử dụng kỹ thuật **Data Injection**. Thay vì chỉ dùng tập train có sẵn, chúng tôi trích xuất thêm dữ liệu từ tập Validation của một nguồn dataset phụ (Sub-Dataset) để bổ sung vào.
+
+\begin{table}[H]
+\centering
+\caption{Chiến lược Data Injection}
+\begin{tabular}{|l|p{10cm}|}
+\hline
+\textbf{Thành phần} & \textbf{Chi tiết thực hiện} \\ \hline
+\textbf{Nguồn dữ liệu} & Dataset chính (Vipoooool) + Dataset phụ (Tunphtnguynhu - chứa nhiều ảnh thực tế hơn). \\ \hline
+\textbf{Cách chia} & Lấy 50\% ảnh từ tập Valid của Dataset phụ, trộn vào tập Train chính. 50\% còn lại trộn vào tập Valid chính. \\ \hline
+\textbf{Mục đích} & Tăng tính đa dạng (diversity) của dữ liệu, giúp mô hình tiếp xúc với nhiều biến thể ảnh thực tế hơn ngay trong quá trình huấn luyện. \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Tiền Xử Lý Ảnh Nâng Cao (Leaf Segmentation Pipeline)}
+Để xử lý các ảnh đầu vào phức tạp từ thực tế (nhiều lá, nền nhiễu), chúng tôi phát triển thêm module tiền xử lý (được cài đặt trong \texttt{src/server/image\_preprocessing.py}) có nhiệm vụ tách triệt để nền (background removal).
+
+\paragraph{Bước 1: Tạo Mask Ban Đầu (HSV Color Thresholding)}
+Chuyển đổi ảnh sang không gian màu HSV và tạo mask nhị phân dựa trên dải màu xanh (Green) và vàng (Yellow) của lá bệnh.
+\begin{itemize}
+    \item \textbf{Green Range:} Hue [25, 95], Saturation [30, 255], Value [30, 255].
+    \item \textbf{Yellow Range:} Hue [15, 35] (để bắt các vết bệnh vàng).
+\end{itemize}
+
+\paragraph{Bước 2: Thuật toán GrabCut}
+Sử dụng mask màu ở Bước 1 làm "gợi ý" (initial mask) cho thuật toán **GrabCut**. GrabCut sử dụng mô hình đồ thị (Graph Cut) để phân tách pixel tiền cảnh (foreground) và hậu cảnh (background) một cách tối ưu.
+\begin{equation}
+    E(\alpha, k, \theta, z) = U(\alpha, k, \theta, z) + V(\alpha, z)
+\end{equation}
+Trong đó $U$ là năng lượng dữ liệu (dựa trên màu sắc) và $V$ là năng lượng trơn (độ mượt của biên).
+
+\paragraph{Bước 3: Tinh Chỉnh Mask (Morphological Operations)}
+Áp dụng phép Đóng (Closing - Dilation rồi Erosion) để lấp các lỗ thủng nhỏ trên lá và phép Mở (Opening) để loại bỏ nhiễu hạt bên ngoài.
+
+\paragraph{Bước 4: Trích Xuất Contour}
+Tìm đường viền (contour) lớn nhất trong mask để xác định chiếc lá chính, loại bỏ các mảnh vụn nhỏ còn sót lại.
+
+\subsection{Cấu Hình DataLoader}
+Sau khi tiền xử lý, dữ liệu được đóng gói vào các \texttt{DataLoader} để cấp phát cho quá trình huấn luyện.
+
+\subsubsection{Train Loader (Bộ nạp dữ liệu huấn luyện)}
+\begin{itemize}
+    \item \textbf{Chức năng:} Tạo dòng chảy dữ liệu liên tục cho tập huấn luyện (`train\_ds`).
+    \item \textbf{Batch Size = 64:} Mỗi lần mô hình nhận vào 64 mẫu.
+    \item \textbf{Shuffle = True:} Xáo trộn dữ liệu ngẫu nhiên ở đầu mỗi epoch.
+    \item \textbf{Num Workers = 8:} Sử dụng 8 tiến trình con (processes) để tải dữ liệu.
+    \item \textbf{Pin Memory = True:} Ghim vùng nhớ trên RAM để tăng tốc truyền tải sang GPU.
+\end{itemize}
+
+\subsubsection{Validation Loader (Bộ nạp dữ liệu kiểm thử)}
+\begin{itemize}
+    \item \textbf{Chức năng:} Cung cấp dữ liệu cho quá trình đánh giá (`valid\_ds`).
+    \item \textbf{Shuffle = False:} Không xáo trộn dữ liệu để đảm bảo tính nhất quán.
+    \item \textbf{Batch Size = 64, Num Workers = 8:} Tương tự như tập train.
+\end{itemize}
+
+% --- CHƯƠNG 4 ---
+\newpage
+\section{MÔ HÌNH HỌC MÁY SỬ DỤNG}
+
+\subsection{Cơ Sở Lý Thuyết Về Mạng Nơ-ron Tích Chập (CNN)}
+Mạng nơ-ron tích chập (Convolutional Neural Networks - CNN) là một trong những kiến trúc mạng nơ-ron sâu (Deep Learning) hiệu quả nhất hiện nay cho các bài toán thị giác máy tính.
+
+\subsubsection{Lớp Tích Chập (Convolutional Layer)}
+Thực hiện phép toán tích chập giữa ảnh đầu vào $I$ và một bộ lọc (kernel) $K$ để tạo ra bản đồ đặc trưng (feature map).
+\begin{equation}
+    S(i, j) = (I * K)(i, j) = \sum_{m} \sum_{n} I(i-m, j-n) \cdot K(m, n)
+\end{equation}
+
+\subsubsection{Hàm Kích Hoạt (Activation Function)}
+\begin{enumerate}
+    \item \textbf{ReLU (Rectified Linear Unit):} $f(x) = \max(0, x)$
+    \item \textbf{Hard-Swish (trong MobileNetV3):} $h\text{-}swish(x) = x \cdot \frac{\text{ReLU6}(x+3)}{6}$
+\end{enumerate}
+
+\subsubsection{Lớp Gộp (Pooling Layer)}
+Giảm kích thước không gian của feature map.
+\begin{equation}
+    P(i, j) = \max_{m, n \in \{0, 1\}} I(2i+m, 2j+n)
+\end{equation}
+
+\subsubsection{Lớp Kết Nối Đầy Đủ (Fully Connected Layer - FC)}
+Thực hiện nhiệm vụ phân loại sau khi các đặc trưng đã được trích xuất.
+\begin{equation}
+    y = Wx + b
+\end{equation}
+
+\subsection{Các Kiến Trúc Mô Hình Được Lựa Chọn}
+Chúng tôi lựa chọn và so sánh 3 kiến trúc CNN tiêu biểu:
+
+\subsubsection{MobileNetV3 Large}
+MobileNetV3 được thiết kế tối ưu cho CPU di động và các thiết bị nhúng.
+\paragraph{Nguyên lý hoạt động:} Sử dụng **Mobile Bottleneck Block** với Depthwise Separable Convolution để giảm chi phí tính toán, kết hợp với module **SE (Squeeze-and-Excitation)** để tăng sự tập trung vào các đặc trưng quan trọng.
+\paragraph{Lý do lựa chọn:} Cân bằng tốt nhất giữa tốc độ và độ chính xác, phù hợp để triển khai trên Web App hoặc Mobile.
+
+\subsubsection{EfficientNet-B0}
+\paragraph{Nguyên lý hoạt động:} Sử dụng cơ chế **Compound Scaling** để cân đối đồng thời chiều sâu, chiều rộng và độ phân giải của mạng. Kiến trúc cơ sở là MBConv (Mobile Inverted Bottleneck).
+\paragraph{Lý do lựa chọn:} Đạt hiệu suất cao (SOTA) với số lượng tham số ít hơn nhiều so với các mô hình truyền thống.
+
+\subsubsection{ResNet-18}
+\paragraph{Nguyên lý hoạt động:} Sử dụng **Residual Block** với các kết nối tắt (Skip Connections) giúp giải quyết vấn đề biến mất đạo hàm (vanishing gradient) khi huấn luyện mạng sâu.
+\paragraph{Lý do lựa chọn:} Kiến trúc đơn giản, huấn luyện cực kỳ ổn định và có khả năng trích xuất đặc trưng hình thái rất tốt (ít bị nhiễu bởi màu sắc sai lệch).
+
+\subsection{Mô Hình Phát Hiện Vật Thể (YOLOv11)}
+Để giải quyết bài toán phát hiện lá trong ảnh phức tạp (nhiều lá, nền nhiễu), chúng tôi tích hợp thêm **YOLOv11** (You Only Look Once - Generation 11).
+\begin{itemize}
+    \item \textbf{Mục tiêu:} Phát hiện và khoanh vùng (bounding box) chính xác vị trí của các chiếc lá trong ảnh toàn cảnh.
+    \item \textbf{Nguyên lý:} Chia ảnh thành các grid, dự đoán đồng thời bounding box và xác suất lớp cho từng ô.
+\end{itemize}
+
+\subsection{Quy Trình Huấn Luyện (Training Process)}
+\subsubsection{Môi Trường Vả Cấu Hình}
+\begin{itemize}
+    \item \textbf{GPU:} NVIDIA Tesla T4 / P100.
+    \item \textbf{Framework:} PyTorch 2.x.
+\end{itemize}
+
+\subsubsection{Hàm Mất Mát (Loss Function)}
+Sử dụng **Cross Entropy Loss** kết hợp với **Label Smoothing** (epsilon=0.1) để giảm tình trạng overconfidence và overfitting.
+$$ y_{new} = (1 - \epsilon) \times y_{old} + \frac{\epsilon}{M} $$
+
+\subsubsection{Thuật Toán Tối Ưu (Optimizer)}
+Sử dụng **AdamW** (Adam with Weight Decay) để cập nhật trọng số, giúp mô hình hội tụ nhanh và ổn định hơn. Weight Decay được thiết lập là 1e-4.
+
+\subsubsection{Chiến Lược Điều Chỉnh Learning Rate (Hyperparameter Tuning)}
+Sử dụng **Cosine Annealing Warm Restarts**:
+Learning rate giảm dần theo hàm Cosine từ $\eta_{max} = 0.001$ xuống $\eta_{min} = 1e-5$ trong chu kỳ 30 epochs.
+
+\subsubsection{Cơ Chế Dừng Sớm (Early Stopping)}
+Theo dõi Validation Loss với `patience = 5`. Nếu sau 5 epochs Loss không giảm, quá trình huấn luyện sẽ dừng lại để lấy checkpoint tốt nhất.
+
+\subsection{Kỹ Thuật Transfer Learning}
+Áp dụng Transfer Learning từ các mô hình đã pre-trained trên ImageNet. Bước quan trọng là thay thế lớp Fully Connected cuối cùng để phù hợp với 38 lớp đầu ra của bài toán.
+
+\paragraph{Triển khai:}
+\begin{lstlisting}[language=Python]
+# MobileNetV3
+model.classifier[3] = nn.Linear(960, 38)
+# EfficientNet
+model.classifier[1] = nn.Linear(1280, 38)
+# ResNet-18
+model.fc = nn.Linear(512, 38)
+\end{lstlisting}
+
+% --- CHƯƠNG 5 ---
+\newpage
+\section{KẾT QUẢ VÀ ĐÁNH GIÁ MÔ HÌNH}
+
+\subsection{Kết Quả Huấn Luyện (Training Results)}
+
+\subsubsection{MobileNetV3}
+\begin{itemize}
+    \item \textbf{Validation Accuracy:} 96.67\%
+    \item \textbf{Validation Loss:} 0.1065
+    \item \textbf{Nhận xét:} Hội tụ rất nhanh và ổn định ngay từ những epoch đầu tiên.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{photo/mobilenetV3_chart.png}
+    \caption{Biểu đồ Loss/Accuracy của MobileNetV3}
+\end{figure}
+
+\subsubsection{EfficientNet-B0}
+\begin{itemize}
+    \item \textbf{Validation Accuracy:} 96.66\%
+    \item \textbf{Validation Loss:} 0.1054
+    \item \textbf{Nhận xét:} Loss giảm sâu hơn MobileNet một chút nhưng dao động nhiều hơn ở các epoch cuối.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{photo/efficientnet_chart.png}
+    \caption{Biểu đồ Loss/Accuracy của EfficientNet-B0}
+\end{figure}
+
+\subsubsection{ResNet-18}
+\begin{itemize}
+    \item \textbf{Validation Accuracy:} 94.67\%
+    \item \textbf{Validation Loss:} 0.1632
+    \item \textbf{Nhận xét:} Độ chính xác thấp hơn hai model trên khoảng 2\%, tuy nhiên đồ thị hội tụ rất mượt mà.
+\end{itemize}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{photo/resnet18_chart.png}
+    \caption{Biểu đồ Loss/Accuracy của ResNet-18}
+\end{figure}
+
+\subsection{Đánh Giá Tổng Hợp (Comprehensive Evaluation)}
+\subsubsection{So Sánh Các Chỉ Số (Metrics)}
+\begin{table}[H]
+\centering
+\caption{Bảng so sánh hiệu suất trên tập Validation}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\ \hline
+MobileNetV3 & \textbf{96.67\%} & \textbf{96.79\%} & \textbf{96.63\%} & \textbf{96.68\%} \\ \hline
+EfficientNet-B0 & 96.66\% & 96.79\% & 96.60\% & 96.65\% \\ \hline
+ResNet-18 & 94.67\% & 95.73\% & 93.99\% & 88.73\% \\ \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Phân Tích Confusion Matrix}
+\begin{figure}[H]
+    \centering
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{photo/mobilenetV3_confusionmatrix.png}
+        \caption{MobileNetV3}
+    \end{minipage}
+    \hfill
+    \begin{minipage}{0.45\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{photo/eficient_confusionmatrix.png}
+        \caption{EfficientNet-B0}
+    \end{minipage}
+    \caption{Ma trận nhầm lẫn cho thấy MobileNet và EfficientNet ít điểm nhầm lẫn hơn ResNet.}
+\end{figure}
+
+\subsubsection{Biểu Đồ ROC}
+Các đường cong ROC của cả 3 mô hình đều tiệm cận góc trên bên trái (AUC $\approx$ 0.99), chứng tỏ khả năng phân loại xuất sắc.
+
+\subsection{Kết Quả Thử Nghiệm Trên Các Ảnh Thực Tế (Testing Scenarios)}
+Chúng tôi đã tiến hành thử nghiệm trên nhiều kịch bản khó (Scenarios 1-8).
+
+\paragraph{Kịch bản 1-2: Ảnh Tiêu Chuẩn} MobileNetV3 và EfficientNet hoạt động tốt nhất trong phòng Lab. Tuy nhiên, ResNet-18 lại vượt trội ở môi trường tự nhiên nhờ khả năng tách nền tốt.
+
+\paragraph{Kịch bản 3-4: Ảnh Quá Sáng} ResNet-18 giữ được độ chính xác cao (90.4\%) trong khi MobileNet và EfficientNet bị nhiễu nặng bởi ánh sáng chói.
+
+\paragraph{Kịch bản 7: Ảnh Phức Tạp (Nhiều lá, nền nhiễu)} Cả 3 mô hình đều thất bại khi chỉ dùng Classification đơn thuần (Raw Input), với độ tin cậy thấp (<40\%).
+
+\paragraph{Kịch bản 8: Giải Pháp YOLOv11 + ResNet-18}
+Khi tích hợp YOLOv11 để cắt lá và GrabCut để tách nền, kết quả được cải thiện ngoạn mục.
+\begin{itemize}
+    \item **ResNet-18** kết hợp với pipeline này cho kết quả **chính xác và ổn định nhất** (Confidence > 80\% trên ảnh thực tế khó).
+\end{itemize}
+
+\subsection{Kết Quả Triển Khai Ứng Dụng (Web App Deployment)}
+Dựa trên kết quả thực nghiệm, chúng tôi đã xây dựng thành công ứng dụng Web hoàn chỉnh.
+
+\subsubsection{Kiến Trúc Hệ Thống}
+Mô hình Client-Server với Frontend (React/Vite) và Backend (Flask/PyTorch), đóng gói bằng Docker.
+
+\subsubsection{Các Chế Độ Xử Lý}
+\begin{itemize}
+    \item \textbf{Basic Classification:} Cho kết quả tức thì với ảnh đơn.
+    \item \textbf{Advanced Pipeline (YOLO + GrabCut):} Xử lý ảnh toàn cảnh, phát hiện nhiều vết bệnh cùng lúc.
+\end{itemize}
+
+\subsubsection{Giao Diện Kết Quả}
+Ứng dụng hiển thị trực quan Bounding Box vị trí lá bệnh và Heatmap giải thích vùng quyết định của mô hình.
+
+% --- CHƯƠNG 6 ---
+\newpage
+\section{KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}
+
+\subsection{Đánh Giá Tổng Thể Dự Án}
+Sau quá trình nỗ lực cải tiến và tích hợp các công nghệ tiên tiến, đồ án đã đạt được những bước tiến quan trọng:
+\begin{itemize}
+    \item \textbf{Khắc phục nhiễu nền:} Tích hợp YOLOv11 và GrabCut giúp loại bỏ nhiễu môi trường.
+    \item \textbf{Xử lý đa vật thể:} Có thể phát hiện nhiều lá bệnh trên cùng một ảnh.
+    \item \textbf{Chọn được mô hình tối ưu:} ResNet-18 tuy điểm số trên tập Valid thấp hơn nhưng lại bền vững nhất trong thực tế khi kết hợp với Pipeline xử lý ảnh.
+\end{itemize}
+
+\subsection{Hạn Chế}
+\begin{itemize}
+    \item Tốc độ xử lý của Advanced Pipeline còn chậm do bước GrabCut.
+    \item Phụ thuộc vào độ chính xác của YOLO (nếu YOLO không detect được lá thì không phân loại được).
+\end{itemize}
+
+\subsection{Hướng Phát Triển}
+\begin{itemize}
+    \item Tối ưu hóa Real-time bằng YOLOv11-Nano và Quantization.
+    \item Mở rộng tập dữ liệu với các cây trồng bản địa Việt Nam.
+    \item Phát triển Mobile App Offline (Edge AI).
+\end{itemize}
+
+% --- CHƯƠNG 7 ---
+\newpage
+\addcontentsline{toc}{section}{TÀI LIỆU THAM KHẢO}
+\renewcommand{\refname}{TÀI LIỆU THAM KHẢO}
+
+\begin{thebibliography}{99}
+
+\bibitem{mobilenet}
+Howard, A., Sandler, M., Chu, G., Chen, L. C., Chen, B., Tan, M., ... \& Adam, H. (2019). Searching for MobileNetV3. \textit{Proceedings of the IEEE/CVF International Conference on Computer Vision}, 1314-1324.
+
+\bibitem{resnet}
+He, K., Zhang, X., Ren, S., \& Sun, J. (2016). Deep residual learning for image recognition. \textit{Proceedings of the IEEE conference on computer vision and pattern recognition}, 770-778.
+
+\bibitem{efficientnet}
+Tan, M., \& Le, Q. (2019). Efficientnet: Rethinking model scaling for convolutional neural networks. \textit{International conference on machine learning}, PMLR, 6105-6114.
+
+\bibitem{dataset}
+Vipoooool. (2024). New Plant Diseases Dataset. Kaggle. URL: https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset.
+
+\bibitem{plantdoc}
+Singla, A., Padolla, S., \& Deng, J. (2019). PlantDoc: A Dataset for Visual Plant Disease Detection. \textit{Conference on Computer Vision and Pattern Recognition (CVPR) Workshops}.
+
+\bibitem{flask}
+Grinberg, M. (2018). \textit{Flask web development: developing web applications with python}. " O'Reilly Media, Inc.".
+
+\bibitem{react}
+Banks, A., \& Porcello, E. (2017). \textit{Learning React: Functional Web Development with React and Redux}. " O'Reilly Media, Inc.".
+
+\end{thebibliography}
+
+\end{document}

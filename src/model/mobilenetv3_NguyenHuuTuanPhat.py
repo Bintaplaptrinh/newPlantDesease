@@ -1,3 +1,5 @@
+# script train mobilenetv3 (chủ yếu dùng để tái train/ghi ra .pth)
+
 import os
 from dataclasses import dataclass
 from typing import Dict, Tuple
@@ -28,7 +30,7 @@ class EarlyStopping:
         self.counter = 0
 
     def step(self, val_loss: float):
-        # Return True if should stop
+        # trả về True nếu nên dừng sớm
         if val_loss < self.best_loss - self.min_delta:
             self.best_loss = val_loss
             self.counter = 0
@@ -38,14 +40,14 @@ class EarlyStopping:
 
 
 def build_model(num_classes: int, device: str):
-    # MobileNetV3 Large
+    # mobilenetv3 large (pretrained imagenet)
     model = models.mobilenet_v3_large(weights="IMAGENET1K_V1")
     model.classifier[3] = nn.Linear(model.classifier[3].in_features, num_classes)
     return model.to(device)
 
 
 def load_model(path: str, num_classes: int, device: str):
-    # Load from disk if exists, else build fresh
+    # load từ disk nếu có, nếu không thì build mới
     if os.path.exists(path):
         m = torch.load(path, weights_only=False, map_location=device)
         m = m.to(device)
@@ -55,7 +57,7 @@ def load_model(path: str, num_classes: int, device: str):
 
 
 def load_pth(path: str, device: str):
-    # Load trained model from .pth
+    # load model đã train từ file .pth
     m = torch.load(path, weights_only=False, map_location=device)
     m = m.to(device)
     m.eval()
@@ -63,12 +65,12 @@ def load_pth(path: str, device: str):
 
 
 def _batchnorm_modules(model: nn.Module):
-    # Find BN modules
+    # lấy danh sách module batchnorm
     return [m for m in model.modules() if isinstance(m, (nn.BatchNorm1d, nn.BatchNorm2d, nn.BatchNorm3d))]
 
 
 def _save_bn_state(model: nn.Module):
-    # Save BN running stats
+    # lưu running stats của batchnorm để restore sau adabn
     bns = _batchnorm_modules(model)
     state = []
     for bn in bns:
@@ -83,7 +85,7 @@ def _save_bn_state(model: nn.Module):
 
 
 def _restore_bn_state(bns, state):
-    # Restore BN running stats
+    # restore running stats của batchnorm
     for bn, (rm, rv, nbt) in zip(bns, state):
         bn.running_mean.copy_(rm)
         bn.running_var.copy_(rv)
@@ -93,7 +95,7 @@ def _restore_bn_state(bns, state):
 
 @torch.no_grad()
 def adapt_batchnorm(model: nn.Module, loader, device: str, num_batches: int = 20):
-    # AdaBN pass
+    # chạy adabn: cập nhật running mean/var theo dữ liệu target
     bns = _batchnorm_modules(model)
     if len(bns) == 0:
         return
@@ -112,7 +114,7 @@ def adapt_batchnorm(model: nn.Module, loader, device: str, num_batches: int = 20
 
 @torch.no_grad()
 def validate(model, val_loader, criterion, device: str, use_adabn: bool, adabn_batches: int, use_tta_flip: bool):
-    # Validation loop
+    # vòng lặp validation
     if use_adabn:
         bns, bn_state = _save_bn_state(model)
         adapt_batchnorm(model, val_loader, device=device, num_batches=adabn_batches)
@@ -148,7 +150,7 @@ def validate(model, val_loader, criterion, device: str, use_adabn: bool, adabn_b
 
 
 def train(model, train_loader, valid_loader, device: str, config: TrainConfig, save_path: str = "mobilenet_v3.pth"):
-    # Train only classifier
+    # chỉ train phần classifier
     criterion = nn.CrossEntropyLoss(label_smoothing=config.label_smoothing)
 
     for p in model.parameters():
@@ -245,7 +247,7 @@ def train_pipeline(
     image_size: int = 224,
     device: str | None = None,
 ):
-    # Download + merge dataset, then train MobileNetV3
+    # download + gộp dataset, sau đó train mobilenetv3
     if device is None:
         device = "cuda" if torch.cuda.is_available() else "cpu"
 

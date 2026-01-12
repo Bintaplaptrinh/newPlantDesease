@@ -1,10 +1,5 @@
-"""
-YOLOv11 Object Detection Module for Plant Disease Detection Pipeline.
-
-This module handles leaf detection using a fine-tuned YOLOv11 model.
-The detection is performed at low resolution, but cropping is done 
-on the original high-resolution image to preserve image quality.
-"""
+# module detect lá bằng yolo cho pipeline nhận diện bệnh cây
+# detect chạy ở độ phân giải thấp, nhưng crop trên ảnh gốc độ phân giải cao để giữ chất lượng
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -18,7 +13,7 @@ from PIL import Image
 
 @dataclass
 class DetectionBox:
-    """Represents a detected bounding box."""
+    # biểu diễn một bounding box đã detect
     x1: int
     y1: int
     x2: int
@@ -44,16 +39,10 @@ class DetectionBox:
         original_size: Tuple[int, int], 
         resized_size: Tuple[int, int]
     ) -> "DetectionBox":
-        """
-        Scale bounding box from resized image coordinates to original image coordinates.
-        
-        Args:
-            original_size: (width, height) of original image
-            resized_size: (width, height) of resized image used for detection
-        
-        Returns:
-            New DetectionBox with scaled coordinates
-        """
+        # scale bbox từ tọa độ ảnh resize về tọa độ ảnh gốc
+        # original_size: (width, height) của ảnh gốc
+        # resized_size: (width, height) của ảnh dùng để detect
+        # trả về DetectionBox mới với tọa độ đã scale
         orig_w, orig_h = original_size
         resized_w, resized_h = resized_size
         
@@ -71,7 +60,7 @@ class DetectionBox:
         )
 
     def clamp_to_image(self, width: int, height: int) -> "DetectionBox":
-        """Clamp box coordinates to image boundaries."""
+        # giới hạn tọa độ bbox nằm trong biên ảnh
         return DetectionBox(
             x1=max(0, min(self.x1, width - 1)),
             y1=max(0, min(self.y1, height - 1)),
@@ -84,7 +73,7 @@ class DetectionBox:
 
 
 class YOLODetector:
-    """YOLOv11 detector for leaf detection."""
+    # yolo detector dùng để phát hiện lá
 
     DEFAULT_DETECTION_SIZE = 640  # Standard YOLO input size
     DEFAULT_CONFIDENCE_THRESHOLD = 0.25
@@ -106,7 +95,7 @@ class YOLODetector:
         self._model = None
 
     def _load_model(self):
-        """Lazy load the YOLO model."""
+        # load model yolo theo kiểu lazy (chỉ load khi cần)
         if self._model is None:
             try:
                 from ultralytics import YOLO
@@ -127,20 +116,9 @@ class YOLODetector:
         conf_threshold: Optional[float] = None,
         iou_threshold: Optional[float] = None,
     ) -> List[DetectionBox]:
-        """
-        Detect objects in the image.
-        
-        The detection is performed at low resolution (detection_size),
-        but coordinates are scaled back to original image size.
-        
-        Args:
-            image: PIL Image to detect objects in
-            conf_threshold: Override default confidence threshold
-            iou_threshold: Override default IOU threshold
-            
-        Returns:
-            List of DetectionBox objects with coordinates in original image space
-        """
+        # detect đối tượng trong ảnh
+        # detect chạy ở độ phân giải thấp (detection_size), nhưng tọa độ trả về theo ảnh gốc
+        # conf_threshold/iou_threshold có thể override giá trị mặc định
         model = self._load_model()
         
         # Store original size
@@ -202,21 +180,9 @@ class YOLODetector:
         padding: int = 10,
         conf_threshold: Optional[float] = None,
     ) -> Tuple[Image.Image, Optional[DetectionBox]]:
-        """
-        Detect the largest/best object and crop it from the original image.
-        
-        This implements the "detect at low-res, crop at high-res" strategy
-        to preserve image quality.
-        
-        Args:
-            image: Original high-resolution PIL Image
-            padding: Extra pixels to add around the detected box
-            conf_threshold: Override default confidence threshold
-            
-        Returns:
-            Tuple of (cropped_image, detection_box). If no detection found,
-            returns (original_image, None)
-        """
+        # detect đối tượng tốt/đại diện nhất rồi crop từ ảnh gốc
+        # chiến lược: detect low-res, crop high-res để giữ chất lượng
+        # nếu không detect được thì trả về (ảnh gốc, None)
         detections = self.detect(image, conf_threshold=conf_threshold)
         
         if not detections:
@@ -248,5 +214,5 @@ class YOLODetector:
 
 @lru_cache(maxsize=1)
 def get_yolo_detector(model_path: str, device: str = "cpu") -> YOLODetector:
-    """Get cached YOLO detector instance."""
+    # lấy instance yolo detector theo cache
     return YOLODetector(model_path=model_path, device=device)

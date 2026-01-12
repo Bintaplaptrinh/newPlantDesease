@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+# tiện ích xác định các path gốc của project
+
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -22,4 +24,5 @@ class ProjectPaths:
 
 
 def project_paths() -> ProjectPaths:
+    # hàm wrapper để lấy ProjectPaths
     return ProjectPaths.detect()

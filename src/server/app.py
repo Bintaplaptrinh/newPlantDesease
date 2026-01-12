@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+# api server (flask) cho web demo
+# cung cấp endpoints:
+# - /api/predict: phân loại bệnh (có thể dùng yolo + tiền xử lí)
+# - /api/explain: saliency heatmap
+# - /api/data/*: metadata (classes, stats, models, ...)
+
 import base64
 import io
 from functools import lru_cache
@@ -14,7 +20,7 @@ from src.inference import load_torch_model, predict_image, predict_images, salie
 from src.server.config import ServerConfig, detect_device
 from src.utils.json_io import read_json
 
-# Optional imports for YOLO and preprocessing pipeline
+# import tuỳ chọn cho yolo và tiền xử lí (để server vẫn chạy được nếu thiếu dependency)
 try:
     from src.server.yolo_detector import YOLODetector, get_yolo_detector
     YOLO_AVAILABLE = True
@@ -30,6 +36,7 @@ except ImportError:
 
 
 def create_app(config: Optional[ServerConfig] = None) -> Flask:
+    # tạo flask app theo config (hoặc dùng config mặc định)
     cfg = config or ServerConfig.default()
 
     app = Flask(__name__)
@@ -37,14 +44,16 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
 
     @lru_cache(maxsize=1)
     def _classes_payload() -> Dict[str, Any]:
+        # cache classes.json để giảm IO
         classes_path = cfg.data_web_dir / "classes.json"
         if classes_path.exists():
             return read_json(classes_path)
-        # fallback: empty
+        # fallback: rỗng
         return {"labels": [], "shortLabels": [], "numClasses": 0}
 
     @lru_cache(maxsize=8)
     def _load_model_cached(model_id: str):
+        # cache model theo id để tránh load .pth nhiều lần
         device = detect_device()
         if model_id not in cfg.models:
             raise KeyError(model_id)
@@ -60,6 +69,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
         morph_kernel_size: int,
         use_green_mask: bool,
     ):
+        # cache preprocessor vì khởi tạo cv2/grabcut tốn thời gian
         if not PREPROCESSING_AVAILABLE:
             raise RuntimeError("preprocessing not available")
         return create_preprocessor(
@@ -69,9 +79,11 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
         )
 
     def _arg_bool(name: str, default: bool = False) -> bool:
+        # parse query param kiểu bool (?flag=true/false)
         return request.args.get(name, "true" if default else "false").lower() == "true"
 
     def _arg_int(name: str, default: int, *, min_value: int | None = None, max_value: int | None = None) -> int:
+        # parse query param kiểu int, có clamp min/max
         try:
             v = int(request.args.get(name, str(default)))
         except Exception:
@@ -83,6 +95,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
         return v
 
     def _arg_float(name: str, default: float, *, min_value: float | None = None, max_value: float | None = None) -> float:
+        # parse query param kiểu float, có clamp min/max
         try:
             v = float(request.args.get(name, str(default)))
         except Exception:
@@ -94,6 +107,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
         return v
 
     def _crop_with_padding(image: Image.Image, *, x1: int, y1: int, x2: int, y2: int, padding: int) -> Tuple[Image.Image, Dict[str, int]]:
+        # crop ảnh theo bbox và thêm padding, đồng thời clamp theo kích thước ảnh
         w, h = image.size
         px1 = max(0, int(x1) - int(padding))
         py1 = max(0, int(y1) - int(padding))
@@ -103,12 +117,14 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
         return crop, {"x1": px1, "y1": py1, "x2": px2, "y2": py2}
 
     def _read_web_json(filename: str):
+        # đọc artifact json chung trong data/web
         p = (cfg.data_web_dir / filename)
         if not p.exists():
             return None
         return read_json(p)
 
     def _read_model_json(model_id: str, filename: str):
+        # đọc artifact json theo model trong data/web/models/<model_id>/
         p = cfg.data_web_dir / "models" / model_id / filename
         if not p.exists():
             return None
@@ -157,17 +173,17 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
         model_id = request.args.get("model", "resnet18")
         top_k = int(request.args.get("top_k", "5"))
         
-        # New pipeline options
+        # options pipeline
         use_yolo = _arg_bool("use_yolo", default=False)
         use_preprocessing = _arg_bool("use_preprocessing", default=False)
 
-        # YOLO tuning (safe defaults)
+        # tham số yolo (giá trị mặc định an toàn)
         yolo_conf = _arg_float("yolo_conf", 0.25, min_value=0.0, max_value=1.0)
         yolo_iou = _arg_float("yolo_iou", 0.45, min_value=0.0, max_value=1.0)
         yolo_padding = _arg_int("yolo_padding", 15, min_value=0, max_value=2000)
         yolo_max_detections = _arg_int("yolo_max_detections", 10, min_value=1, max_value=100)
 
-        # Unknown rule: if classifier top1 prob < threshold => label=unknown
+        # rule unknown: nếu top1 prob < ngưỡng thì nhãn = unknown
         unknown_threshold = _arg_float(
             "unknown_threshold",
             0.10 if use_yolo else 0.0,
@@ -200,11 +216,10 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
             return jsonify({"error": f"unknown model '{model_id}'"}), 404
 
         if not classes:
-            # Allow inference even when classes.json missing
-            # (will return class_<idx> labels)
+            # vẫn cho phép infer nếu thiếu classes.json (sẽ trả label dạng class_<idx>)
             classes = []
 
-        # Initialize pipeline info
+        # thông tin pipeline để frontend hiển thị
         pipeline_info = {
             "yolo_used": False,
             "preprocessing_used": False,
@@ -215,7 +230,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
             "unknown_threshold": unknown_threshold,
         }
 
-        # Mode A: YOLO on -> detect ALL leaves, crop each, optionally preprocess each, batch-classify
+        # mode a: bật yolo -> detect tất cả lá, crop từng bbox, (tuỳ chọn) tiền xử lí từng crop, rồi phân loại theo batch
         if use_yolo:
             if not YOLO_AVAILABLE:
                 pipeline_info["yolo_error"] = "YOLO module not available (missing ultralytics package)"
@@ -255,7 +270,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
                         pipeline_info["yolo_detection"] = det_payloads[0]
                         pipeline_info["yolo_detections"] = det_payloads
 
-                        # Batch classify (optionally compare original vs preprocessed and pick best)
+                        # phân loại theo batch (có thể so sánh ảnh gốc vs ảnh đã tiền xử lí và chọn kết quả tự tin hơn)
                         preds_original = predict_images(
                             model,
                             crops,
@@ -273,7 +288,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
                                 pipeline_info["preprocessing_error"] = "Preprocessing module not available (missing opencv-python package)"
                             else:
                                 try:
-                                    # Fewer iterations tends to be less destructive and faster
+                                    # giảm iterations thường ít phá ảnh hơn và chạy nhanh hơn
                                     preprocessor = _get_preprocessor_cached(3, 5, True)
                                     processed_crops = [preprocessor.segment_leaf(c) for c in crops]
                                     preds_preprocessed = predict_images(
@@ -287,7 +302,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
                                 except Exception as e:
                                     pipeline_info["preprocessing_error"] = str(e)
 
-                        # Select per-crop best result
+                        # chọn kết quả tốt nhất theo từng crop
                         batch_preds: List[Tuple[str, float, List[Dict[str, float]]]] = []
                         used_preprocessed_any = False
                         if preds_preprocessed is None:
@@ -316,7 +331,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
                                 }
                             )
 
-                        # For backward compatibility, keep top-level label as best detection by confidence
+                        # giữ tương thích ngược: label top-level là detection có confidence cao nhất
                         best_det = max(detections_out, key=lambda d: float(d.get("confidence", 0.0)))
                         return jsonify(
                             {
@@ -329,20 +344,20 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
                             }
                         )
 
-                    # YOLO ran but found nothing -> fall back to full-image classification
+                    # yolo chạy nhưng không detect được gì -> fallback về phân loại cả ảnh
                     pipeline_info["yolo_used"] = True
                     pipeline_info["yolo_detections"] = []
                     pipeline_info["yolo_warning"] = "no detections"
                 except Exception as e:
                     pipeline_info["yolo_error"] = str(e)
 
-        # Mode B (or fallback): classify full image, optionally preprocess full image
+        # mode b (hoặc fallback): phân loại cả ảnh, (tuỳ chọn) tiền xử lí rồi chọn kết quả tự tin hơn
         processed_img = img
         if use_preprocessing:
             pipeline_info["preprocessing_attempted"] = True
             pipeline_info["preprocessing_strategy"] = "auto_best_confidence"
 
-        # Always compute original prediction
+        # luôn tính prediction trên ảnh gốc
         label_o, confidence_o, top_o = predict_image(
             model,
             processed_img,
@@ -375,7 +390,7 @@ def create_app(config: Optional[ServerConfig] = None) -> Flask:
                 except Exception as e:
                     pipeline_info["preprocessing_error"] = str(e)
 
-        # In non-YOLO mode, keep behavior as-is (unknown_threshold defaults to 0.0)
+        # ở chế độ không yolo, unknown_threshold mặc định = 0.0 nên giữ hành vi cũ
         if float(unknown_threshold) > 0.0 and float(confidence) < float(unknown_threshold):
             label = "unknown"
 

@@ -1,7 +1,7 @@
-# No feature engineering step in this notebook.
-# Keep this file for pipeline completeness.
+# không có bước feature engineering riêng trong notebook
+# giữ file này để pipeline đầy đủ
 
 
 def passthrough(features):
-    # Return features unchanged
+    # trả về feature y nguyên
     return features
