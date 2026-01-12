@@ -6,7 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 WORKDIR /app
 
-# No extra system deps needed for the inference server.
+# System deps for OpenCV (cv2) on Debian slim
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        libglib2.0-0 \
+        libgl1 \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.docker.txt ./
 

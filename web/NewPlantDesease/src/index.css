@@ -112,6 +112,9 @@ p{
 .mgb-5{
   margin-bottom: 0.5rem;
 }
+.mb-4{
+  margin-bottom: 0.4rem;
+}
 /* Scrollbar styling - Light theme */
 ::-webkit-scrollbar {
   width: 8px;

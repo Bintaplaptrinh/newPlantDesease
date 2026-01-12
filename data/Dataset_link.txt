@@ -1,0 +1,3 @@
+Main Dataset = "https://www.kaggle.com/datasets/vipoooool/new-plant-diseases-dataset"
+Sub Dataset = "https://www.kaggle.com/datasets/tunphtnguynhu/newplantdiseasesdataset"
+YoloV11 model Dataset train = "https://public.roboflow.com/object-detection/plantdoc/1"

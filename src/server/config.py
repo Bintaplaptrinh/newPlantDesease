@@ -11,7 +11,9 @@ from src.utils.paths import project_paths
 class ServerConfig:
     data_web_dir: Path
     models: Dict[str, Path]
+    yolo_model_path: Optional[Path] = None
     default_image_size: int = 224
+    yolo_detection_size: int = 640  # Standard YOLO input size
 
     @staticmethod
     def default() -> "ServerConfig":
@@ -24,7 +26,13 @@ class ServerConfig:
             "efficientnet": p.root / "src" / "model" / "efficientnet.pth",
         }
 
-        return ServerConfig(data_web_dir=data_web_dir, models=models)
+        yolo_path = p.root / "src" / "model" / "yolo11n_finetune.pt"
+
+        return ServerConfig(
+            data_web_dir=data_web_dir, 
+            models=models,
+            yolo_model_path=yolo_path if yolo_path.exists() else None
+        )
 
 
 def safe_join(base: Path, relative: str) -> Path:

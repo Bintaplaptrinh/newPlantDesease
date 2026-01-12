@@ -103,11 +103,43 @@ export type ClassesPayload = {
     numClasses?: number;
 };
 
+export type PipelineInfo = {
+    yolo_used: boolean;
+    preprocessing_used: boolean;
+    mode?: "yolo" | "full_image";
+    unknown_threshold?: number;
+
+    // Backward-compat and summary of first/best detection
+    yolo_detection?: any;
+    // New: list of raw detections from YOLO stage (may not include classification)
+    yolo_detections?: any[];
+
+    original_size: { width: number; height: number };
+    yolo_error?: string;
+    yolo_warning?: string;
+    preprocessing_error?: string;
+};
+
+export type DetectionResult = {
+    box: { x1: number; y1: number; x2: number; y2: number };
+    raw_box?: { x1: number; y1: number; x2: number; y2: number };
+    yolo_confidence?: number;
+    yolo_class_name?: string;
+    crop_size?: { width: number; height: number };
+
+    label: string;
+    confidence: number;
+    is_unknown?: boolean;
+    topK: { label: string; confidence: number }[];
+};
+
 export type PredictResult = {
     modelId: string;
     label: string;
     confidence: number;
     topK: { label: string; confidence: number }[];
+    detections?: DetectionResult[] | null;
+    pipeline?: PipelineInfo;
 };
 
 export type ExplainabilityResult = {
@@ -139,10 +171,28 @@ export const api = {
     getRocMicro: () => getJson<RocMicroPayload>("/api/data/roc-micro"),
     getConfusionMatrix: (modelId: string) => getJson<ConfusionMatrixPayload>(`/api/data/models/${modelId}/confusion-matrix`),
     getTrainingHistory: (modelId: string) => getJson<TrainingHistoryPayload>(`/api/data/models/${modelId}/training-history`),
-    predict: async (modelId: string, file: File, topK = 5): Promise<PredictResult> => {
+    predict: async (
+        modelId: string,
+        file: File,
+        topK = 5,
+        options?: { useYolo?: boolean; usePreprocessing?: boolean }
+    ): Promise<PredictResult> => {
         const form = new FormData();
         form.append("file", file);
-        const res = await fetch(`${apiBase()}/api/predict?model=${encodeURIComponent(modelId)}&top_k=${encodeURIComponent(String(topK))}`, {
+
+        const params = new URLSearchParams({
+            model: modelId,
+            top_k: String(topK),
+        });
+
+        if (options?.useYolo) {
+            params.append("use_yolo", "true");
+        }
+        if (options?.usePreprocessing) {
+            params.append("use_preprocessing", "true");
+        }
+
+        const res = await fetch(`${apiBase()}/api/predict?${params.toString()}`, {
             method: "POST",
             body: form,
         });

@@ -340,7 +340,7 @@ export function Layout() {
                 className="h-screen overflow-y-auto bg-white px-6 md:px-10 lg:px-14"
                 style={{ scrollBehavior: 'smooth' }}
             >
-                {/* ==================== SECTION 1: Introduction & Data ==================== */}
+                {/* SECTION 1: Introduction & Data */}
                 <section
                     ref={(el) => { sectionRefs.current[0] = el }}
                     id="intro"
@@ -549,7 +549,7 @@ export function Layout() {
                     </div>
                 </section>
 
-                {/* ==================== SECTION 2: Model & Statistics ==================== */}
+                {/* SECTION 2: Model & Statistics */}
                 <section
                     ref={(el) => { sectionRefs.current[1] = el }}
                     id="model"
@@ -678,7 +678,7 @@ export function Layout() {
                     </div>
                 </section>
 
-                {/* ==================== SECTION 3: Model Testing ==================== */}
+                {/* SECTION 3: Model Testing */}
                 <section
                     ref={(el) => { sectionRefs.current[2] = el }}
                     id="testing"
@@ -714,7 +714,7 @@ export function Layout() {
                 {/* Footer */}
                 <footer className="py-12 text-center">
                     <p className="text-gray-400 text-sm">
-                        Plant Disease Classification Report • Built with React, Three.js, and Recharts
+                        @Copyright 2024. Developed by Nhóm 6 - Bộ môn CNTT Phân Hiệu trường Đại học Thủy Lợi
                     </p>
                 </footer>
             </div>

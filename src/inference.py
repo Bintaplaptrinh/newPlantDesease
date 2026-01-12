@@ -79,6 +79,51 @@ def predict_image(
     return best["label"], float(best["confidence"]), top
 
 
+@torch.no_grad()
+def predict_images(
+    model: torch.nn.Module,
+    images: List[Image.Image],
+    class_labels: List[str],
+    *,
+    image_size: int = 224,
+    top_k: int = 5,
+    device: str,
+) -> List[Tuple[str, float, List[Dict[str, float]]]]:
+    """Batch predict a list of PIL images.
+
+    Returns one (label, confidence, top_k_list) per image.
+    """
+
+    if not images:
+        return []
+
+    _, val_t = build_transforms(image_size=image_size)
+
+    xs: List[torch.Tensor] = []
+    for image in images:
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+        xs.append(val_t(image))
+
+    x = torch.stack(xs, dim=0).to(device)
+    logits = model(x)
+    probs = F.softmax(logits, dim=1)
+
+    k = min(int(top_k), int(probs.shape[1]))
+    confs, idxs = torch.topk(probs, k=k, dim=1)
+
+    out: List[Tuple[str, float, List[Dict[str, float]]]] = []
+    for row_confs, row_idxs in zip(confs.detach().cpu(), idxs.detach().cpu()):
+        top: List[Dict[str, float]] = []
+        for conf, idx in zip(row_confs.tolist(), row_idxs.tolist()):
+            label = class_labels[int(idx)] if int(idx) < len(class_labels) else f"class_{int(idx)}"
+            top.append({"label": label, "confidence": float(conf)})
+        best = top[0]
+        out.append((best["label"], float(best["confidence"]), top))
+
+    return out
+
+
 def saliency_heatmap_png(
     model: torch.nn.Module,
     image: Image.Image,

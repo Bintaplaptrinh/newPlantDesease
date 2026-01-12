@@ -8,11 +8,12 @@ import {
     Loader2,
     CheckCircle,
     AlertCircle,
-    Leaf,
-    Image as ImageIcon
+    Leaf
 } from "lucide-react";
 
-import { api, type ExplainabilityResult } from "../lib/api";
+import { api, type DetectionResult, type ExplainabilityResult, type PipelineInfo } from "../lib/api";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 function cn(...inputs: (string | undefined | null | false)[]) {
     return twMerge(clsx(inputs));
@@ -22,6 +23,8 @@ interface PredictionResult {
     label: string;
     confidence: number;
     topK: { label: string; confidence: number }[];
+    detections?: DetectionResult[] | null;
+    pipeline?: PipelineInfo;
 }
 
 export function ModelTesting({
@@ -52,6 +55,10 @@ export function ModelTesting({
     const [heatmapOpacity, setHeatmapOpacity] = useState(0.55);
     const [isDragOver, setIsDragOver] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    // Pipeline options (switches)
+    const [useYolo, setUseYolo] = useState(false);
+    const [usePreprocessing, setUsePreprocessing] = useState(false);
 
     useEffect(() => {
         setActiveModelId(defaultModelId);
@@ -99,9 +106,15 @@ export function ModelTesting({
         setExplainError(null);
         setIsExplaining(false);
 
-        api.predict(activeModelId, selectedImage, 5)
+        api.predict(activeModelId, selectedImage, 5, { useYolo, usePreprocessing })
             .then((res) => {
-                setPrediction({ label: res.label, confidence: res.confidence, topK: res.topK });
+                setPrediction({
+                    label: res.label,
+                    confidence: res.confidence,
+                    topK: res.topK,
+                    detections: res.detections,
+                    pipeline: res.pipeline
+                });
                 setIsExplaining(true);
                 return api
                     .explain(activeModelId, selectedImage, "saliency")
@@ -119,7 +132,7 @@ export function ModelTesting({
                 setError(message);
             })
             .finally(() => setIsAnalyzing(false));
-    }, [selectedImage, activeModelId]);
+    }, [selectedImage, activeModelId, useYolo, usePreprocessing]);
 
     const handleReset = useCallback(() => {
         setSelectedImage(null);
@@ -166,6 +179,59 @@ export function ModelTesting({
                         <p className="text-xs text-gray-400 mt-2">
                             Chọn model: <span className="font-medium">{activeModelId}</span>
                         </p>
+                    </div>
+
+                    {/* Pipeline Options - Switches */}
+                    <div className="mb-6 glass-card p-5 mb-4" style={{ background: 'linear-gradient(135deg, rgba(37, 150, 190, 0.03), rgba(61, 184, 229, 0.03))' }}>
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between gap-3 mb-4">
+                                <div className="min-w-0">
+                                    <Label htmlFor="use-yolo" className="text-sm font-medium text-gray-500">
+                                        YOLOv11 Detection
+                                    </Label>
+                                </div>
+                                <Switch
+                                    id="use-yolo"
+                                    checked={useYolo}
+                                    onCheckedChange={setUseYolo}
+                                    aria-label="YOLOv11 Detection"
+                                />
+                            </div>
+
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <Label htmlFor="use-preprocessing" className="text-sm font-medium text-gray-500">
+                                        Tiền xử lí ảnh
+                                    </Label>
+                                </div>
+                                <Switch
+                                    id="use-preprocessing"
+                                    checked={usePreprocessing}
+                                    onCheckedChange={setUsePreprocessing}
+                                    aria-label="Tiền xử lí ảnh"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Pipeline Status */}
+                        {(useYolo || usePreprocessing) && (
+                            <motion.div
+                                initial={{ opacity: 0, height: 0 }}
+                                animate={{ opacity: 1, height: 'auto' }}
+                                exit={{ opacity: 0, height: 0 }}
+                                className="mt-4 pt-4 border-t border-gray-100"
+                            >
+                                <p className="text-xs text-gray-500 flex items-center gap-2">
+                                    <span className="font-medium">Pipeline:</span>
+                                    <span className="text-gray-600">
+                                        Input
+                                        {useYolo && <span className="text-orange-500"> → YOLO</span>}
+                                        {usePreprocessing && <span className="text-purple-500"> → Tiền xử lí</span>}
+                                        <span style={{ color: '#2596be' }}> → Model</span>
+                                    </span>
+                                </p>
+                            </motion.div>
+                        )}
                     </div>
 
                     <h4 className="text-sm font-medium text-gray-600 mb-4 flex items-center gap-2">
@@ -271,70 +337,202 @@ export function ModelTesting({
                                 exit={{ opacity: 0, x: -20 }}
                                 className="space-y-4"
                             >
-                                {/* Main prediction */}
-                                <div
-                                    className="glass-card p-8 relative overflow-hidden"
-                                    style={{ background: 'linear-gradient(135deg, rgba(37, 150, 190, 0.05), rgba(61, 184, 229, 0.05))' }}
-                                >
-                                    <p className="text-sm text-gray-500 mb-1">Lớp dự đoán</p>
-                                    <h3 className="text-xl font-bold mb-2" style={{ color: '#2596be' }}>
-                                        {prediction.label.replace(/___/g, ' - ').replace(/_/g, ' ')}
-                                    </h3>
-                                    <div className="flex items-center gap-2">
-                                        <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
-                                            <motion.div
-                                                initial={{ width: 0 }}
-                                                animate={{ width: `${prediction.confidence * 100}%` }}
-                                                transition={{ duration: 0.5, delay: 0.2 }}
-                                                className="h-full rounded-full"
-                                                style={{ background: 'linear-gradient(90deg, #2596be, #3db8e5)' }}
-                                            />
-                                        </div>
-                                        <span className="text-sm font-medium" style={{ color: '#2596be' }}>
-                                            {(prediction.confidence * 100).toFixed(1)}%
-                                        </span>
-                                    </div>
-                                </div>
-
-                                {/* Top-K predictions */}
-                                <div className="glass-card p-6">
-                                    <p className="text-sm text-gray-500 mb-3">Tỉ lệ dự đoán</p>
-                                    <div className="space-y-2">
-                                        {prediction.topK.map((item, index) => (
-                                            <motion.div
-                                                key={item.label}
-                                                initial={{ opacity: 0, x: -10 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: 0.3 + index * 0.1 }}
-                                                className="flex items-center gap-3"
-                                            >
-                                                <span className="w-6 text-center text-sm text-gray-400">
-                                                    {index + 1}
-                                                </span>
-                                                <div className="flex-1">
-                                                    <div className="flex justify-between items-center mb-1">
-                                                        <span className="text-sm text-gray-700">
-                                                            {item.label.replace(/___/g, ' - ').replace(/_/g, ' ')}
-                                                        </span>
-                                                        <span className="text-xs text-gray-400">
-                                                            {(item.confidence * 100).toFixed(1)}%
-                                                        </span>
-                                                    </div>
-                                                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                                                        <motion.div
-                                                            initial={{ width: 0 }}
-                                                            animate={{ width: `${item.confidence * 100}%` }}
-                                                            transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
-                                                            className={cn("h-full rounded-full")}
-                                                            style={{ background: index === 0 ? 'linear-gradient(90deg, #2596be, #3db8e5)' : '#d1d5db' }}
-                                                        />
-                                                    </div>
+                                {!(prediction.pipeline?.yolo_used && Array.isArray(prediction.detections) && prediction.detections.length > 0) && (
+                                    <>
+                                        {/* Main prediction */}
+                                        <div
+                                            className="glass-card p-8 relative overflow-hidden"
+                                            style={{ background: 'linear-gradient(135deg, rgba(37, 150, 190, 0.05), rgba(61, 184, 229, 0.05))' }}
+                                        >
+                                            <p className="text-sm text-gray-500 mb-1">Lớp dự đoán</p>
+                                            <h3 className="text-xl font-bold mb-2" style={{ color: '#2596be' }}>
+                                                {prediction.label.replace(/___/g, ' - ').replace(/_/g, ' ')}
+                                            </h3>
+                                            <div className="flex items-center gap-2">
+                                                <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${prediction.confidence * 100}%` }}
+                                                        transition={{ duration: 0.5, delay: 0.2 }}
+                                                        className="h-full rounded-full"
+                                                        style={{ background: 'linear-gradient(90deg, #2596be, #3db8e5)' }}
+                                                    />
                                                 </div>
-                                            </motion.div>
-                                        ))}
-                                    </div>
-                                </div>
+                                                <span className="text-sm font-medium" style={{ color: '#2596be' }}>
+                                                    {(prediction.confidence * 100).toFixed(1)}%
+                                                </span>
+                                            </div>
+                                        </div>
 
+                                        {/* Top-K predictions */}
+                                        <div className="glass-card p-6">
+                                            <p className="text-sm text-gray-500 mb-3">Tỉ lệ dự đoán</p>
+                                            <div className="space-y-2">
+                                                {prediction.topK.map((item, index) => (
+                                                    <motion.div
+                                                        key={item.label}
+                                                        initial={{ opacity: 0, x: -10 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ delay: 0.3 + index * 0.1 }}
+                                                        className="flex items-center gap-3"
+                                                    >
+                                                        <span className="w-6 text-center text-sm text-gray-400">
+                                                            {index + 1}
+                                                        </span>
+                                                        <div className="flex-1">
+                                                            <div className="flex justify-between items-center mb-1">
+                                                                <span className="text-sm text-gray-700">
+                                                                    {item.label.replace(/___/g, ' - ').replace(/_/g, ' ')}
+                                                                </span>
+                                                                <span className="text-xs text-gray-400">
+                                                                    {(item.confidence * 100).toFixed(1)}%
+                                                                </span>
+                                                            </div>
+                                                            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                                                                <motion.div
+                                                                    initial={{ width: 0 }}
+                                                                    animate={{ width: `${item.confidence * 100}%` }}
+                                                                    transition={{ duration: 0.5, delay: 0.4 + index * 0.1 }}
+                                                                    className={cn("h-full rounded-full")}
+                                                                    style={{ background: index === 0 ? 'linear-gradient(90deg, #2596be, #3db8e5)' : '#d1d5db' }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </motion.div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+
+                                {/* Pipeline Info - Only show if any pipeline step was used */}
+                                {prediction.pipeline && (prediction.pipeline.yolo_used || prediction.pipeline.preprocessing_used) && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="glass-card p-5"
+                                        style={{ background: 'linear-gradient(135deg, rgba(61, 184, 229, 0.05), rgba(61, 184, 229, 0.015))' }}
+                                    >
+                                        <p className="text-sm text-gray-500 mb-3">Thông tin Pipeline</p>
+                                        <div className="space-y-2.5">
+                                            {prediction.pipeline.yolo_used && (
+                                                <div className="flex items-center gap-3 p-2.5 rounded-lg border" style={{ background: "rgba(61, 184, 229, 0.08)", borderColor: "rgba(61, 184, 229, 0.25)" }}>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-medium" style={{ color: "#2596be" }}>YOLOv11 Detection</p>
+                                                        {Array.isArray(prediction.detections) && prediction.detections.length > 0 ? (
+                                                            <p className="text-xs truncate" style={{ color: "#3db8e5" }}>
+                                                                Đã phát hiện {prediction.detections.length} lá • Unknown &lt; {(Math.max(0, (prediction.pipeline?.unknown_threshold ?? 0.1)) * 100).toFixed(0)}%
+                                                            </p>
+                                                        ) : (
+                                                            prediction.pipeline.yolo_warning ? (
+                                                                <p className="text-xs truncate" style={{ color: "#3db8e5" }}>{String(prediction.pipeline.yolo_warning)}</p>
+                                                            ) : null
+                                                        )}
+                                                    </div>
+                                                    <CheckCircle className="w-4 h-4" style={{ color: "#3db8e5" }} />
+                                                </div>
+                                            )}
+
+                                            {prediction.pipeline.preprocessing_used && (
+                                                <div className="flex items-center gap-3 p-2.5 rounded-lg border" style={{ background: "rgba(61, 184, 229, 0.08)", borderColor: "rgba(61, 184, 229, 0.25)" }}>
+                                                    <div className="flex-1">
+                                                        <p className="text-sm font-medium" style={{ color: "#2596be" }}>Tiền xử lí ảnh</p>
+                                                        <p className="text-xs" style={{ color: "#3db8e5" }}>GrabCut segmentation đã áp dụng</p>
+                                                    </div>
+                                                    <CheckCircle className="w-4 h-4" style={{ color: "#3db8e5" }} />
+                                                </div>
+                                            )}
+
+                                            {/* Show errors if any */}
+                                            {prediction.pipeline.yolo_error && (
+                                                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-red-50 border border-red-200">
+                                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                                    <p className="text-xs text-red-600">{prediction.pipeline.yolo_error}</p>
+                                                </div>
+                                            )}
+                                            {prediction.pipeline.preprocessing_error && (
+                                                <div className="flex items-center gap-3 p-2.5 rounded-lg bg-red-50 border border-red-200">
+                                                    <AlertCircle className="w-4 h-4 text-red-500" />
+                                                    <p className="text-xs text-red-600">{prediction.pipeline.preprocessing_error}</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {/* Multi-leaf detections (when YOLO is enabled) */}
+                                {Array.isArray(prediction.detections) && prediction.detections.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="glass-card p-6"
+                                        style={{ background: 'linear-gradient(135deg, rgba(61, 184, 229, 0.05), rgba(37, 150, 190, 0.02))' }}
+                                    >
+                                        <div className="flex items-center justify-between gap-3 mb-3">
+                                            <div>
+                                                <p className="text-sm text-gray-500">Danh sách lá đã phát hiện</p>
+                                                <p className="text-xs text-gray-400">Mỗi bbox được crop + (tuỳ chọn) tiền xử lí rồi mới phân loại</p>
+                                            </div>
+                                            <span className="text-xs text-gray-500 px-2 py-1 rounded-full bg-gray-50 border border-gray-100">
+                                                {prediction.detections.length} detections
+                                            </span>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            {prediction.detections
+                                                .slice()
+                                                .sort((a, b) => (b.confidence ?? 0) - (a.confidence ?? 0))
+                                                .map((d, idx) => {
+                                                    const prettyLabel = d.label.replace(/___/g, " - ").replace(/_/g, " ");
+                                                    const color = d.is_unknown
+                                                        ? "border-gray-200 bg-gray-50"
+                                                        : d.confidence >= 0.7
+                                                            ? "border-green-200 bg-green-50"
+                                                            : "border-yellow-200 bg-yellow-50";
+                                                    return (
+                                                        <div
+                                                            key={`${d.label}-${idx}-${d.box?.x1 ?? 0}-${d.box?.y1 ?? 0}`}
+                                                            className={cn("p-3 rounded-xl border", color)}
+                                                        >
+                                                            <div className="flex items-start justify-between gap-3">
+                                                                <div className="min-w-0">
+                                                                    <p className="text-sm font-medium text-gray-700 truncate">
+                                                                        #{idx + 1}: {prettyLabel}
+                                                                        {d.is_unknown && (
+                                                                            <span className="ml-2 text-xs text-gray-500">(unknown)</span>
+                                                                        )}
+                                                                    </p>
+                                                                    <p className="text-xs text-gray-500 truncate">
+                                                                        Conf: {(d.confidence * 100).toFixed(1)}%
+                                                                        {typeof d.yolo_confidence === "number" && (
+                                                                            <>
+                                                                                {" "}• YOLO: {(d.yolo_confidence * 100).toFixed(1)}%
+                                                                            </>
+                                                                        )}
+                                                                    </p>
+                                                                </div>
+                                                                <span className="text-xs text-gray-500">
+                                                                    [{d.box.x1},{d.box.y1}]→[{d.box.x2},{d.box.y2}]
+                                                                </span>
+                                                            </div>
+
+                                                            <div className="mt-2">
+                                                                <div className="flex-1 h-1.5 bg-white/60 rounded-full overflow-hidden">
+                                                                    <motion.div
+                                                                        initial={{ width: 0 }}
+                                                                        animate={{ width: `${(d.confidence ?? 0) * 100}%` }}
+                                                                        transition={{ duration: 0.4 }}
+                                                                        className="h-full rounded-full"
+                                                                        style={{ background: d.is_unknown ? "#9ca3af" : 'linear-gradient(90deg, #2596be, #3db8e5)' }}
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                        </div>
+                                    </motion.div>
+                                )}
                                 {/* Explainability / saliency */}
                                 <div className="glass-card p-6">
                                     <div className="flex items-center justify-between gap-4 mb-3">
@@ -373,14 +571,90 @@ export function ModelTesting({
                                             </div>
 
                                             <div className="relative w-full max-w-md mx-auto rounded-xl overflow-hidden shadow-sm border border-gray-100">
-                                                <img src={imagePreview} alt="Input" className="w-full h-auto block" />
+                                                <img
+                                                    src={imagePreview}
+                                                    alt="Input"
+                                                    className="w-full h-auto block"
+                                                    id="analysis-image"
+                                                />
                                                 <img
                                                     src={`data:image/png;base64,${explain.heatmapPngBase64}`}
                                                     alt="Saliency heatmap"
                                                     className="absolute inset-0 w-full h-full object-cover"
                                                     style={{ opacity: heatmapOpacity, mixBlendMode: "multiply" }}
                                                 />
+
+                                                {/* YOLO Detection Box Overlay (multi) */}
+                                                {prediction.pipeline?.yolo_used && prediction.pipeline.original_size && (
+                                                    <svg
+                                                        className="absolute inset-0 w-full h-full pointer-events-none"
+                                                        viewBox={`0 0 ${prediction.pipeline.original_size.width} ${prediction.pipeline.original_size.height}`}
+                                                        preserveAspectRatio="none"
+                                                    >
+                                                        {(Array.isArray(prediction.detections) ? prediction.detections : [])
+                                                            .slice(0, 25)
+                                                            .map((d, i) => {
+                                                                const w = prediction.pipeline!.original_size.width;
+                                                                const h = prediction.pipeline!.original_size.height;
+                                                                const stroke = d.is_unknown ? "#9ca3af" : "#f97316";
+                                                                const label = `${d.label}${d.is_unknown ? " (unknown)" : ""} ${(d.confidence * 100).toFixed(0)}%`;
+                                                                const labelY = Math.max(0, d.box.y1 - h * 0.05);
+                                                                return (
+                                                                    <g key={`${i}-${d.box.x1}-${d.box.y1}`}
+                                                                        opacity={0.95}
+                                                                    >
+                                                                        <rect
+                                                                            x={d.box.x1}
+                                                                            y={d.box.y1}
+                                                                            width={d.box.x2 - d.box.x1}
+                                                                            height={d.box.y2 - d.box.y1}
+                                                                            fill="none"
+                                                                            stroke={stroke}
+                                                                            strokeWidth={Math.max(3, Math.min(w, h) * 0.006)}
+                                                                            rx={4}
+                                                                        />
+                                                                        <rect
+                                                                            x={d.box.x1}
+                                                                            y={labelY}
+                                                                            width={w * 0.45}
+                                                                            height={h * 0.05}
+                                                                            fill={stroke}
+                                                                            rx={2}
+                                                                        />
+                                                                        <text
+                                                                            x={d.box.x1 + w * 0.01}
+                                                                            y={Math.max(h * 0.035, d.box.y1 - h * 0.015)}
+                                                                            fill="white"
+                                                                            fontSize={h * 0.032}
+                                                                            fontWeight="600"
+                                                                            fontFamily="system-ui, sans-serif"
+                                                                        >
+                                                                            {label}
+                                                                        </text>
+                                                                    </g>
+                                                                );
+                                                            })}
+                                                    </svg>
+                                                )}
                                             </div>
+
+                                            {/* Legend when YOLO is used */}
+                                            {prediction.pipeline?.yolo_used && Array.isArray(prediction.detections) && prediction.detections.length > 0 && (
+                                                <div className="flex items-center justify-center gap-4 text-xs text-gray-500">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className="w-3 h-3 rounded border-2 border-orange-500"></div>
+                                                        <span>YOLO Detection Box</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className="w-3 h-3 rounded border-2 border-gray-400"></div>
+                                                        <span>Unknown</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-1.5">
+                                                        <div className="w-3 h-3 rounded bg-gradient-to-r from-blue-500 to-red-500 opacity-70"></div>
+                                                        <span>Saliency Heatmap</span>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     ) : isAnalyzing || isExplaining ? (
                                         <div className="flex items-center gap-2 text-sm text-gray-500">
