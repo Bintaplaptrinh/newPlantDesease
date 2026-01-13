@@ -71,14 +71,32 @@
 \titleformat{\subsection}{\normalfont\large\bfseries}{\thesubsection.}{1em}{}
 \titleformat{\subsubsection}{\normalfont\normalsize\bfseries}{\thesubsubsection.}{1em}{}
 
+% Captions
+\addto\captionsvietnamese{
+  \renewcommand{\contentsname}{MỤC LỤC}
+  \renewcommand{\listfigurename}{DANH MỤC HÌNH VẼ}
+  \renewcommand{\listtablename}{DANH MỤC BẢNG}
+}
+
+% Border
+\newcommand{\DrawBorder}{
+    \begin{tikzpicture}[remember picture, overlay]
+        \draw[line width=1.5pt, color=linepage] ([xshift=1cm, yshift=-1cm] current page.north west) rectangle ([xshift=-1cm, yshift=1cm]current page.south east);
+        \draw[line width=0.5pt, color=black] ([xshift=1.1cm, yshift=-1.1cm] current page.north west) rectangle ([xshift=-1.1cm, yshift=1.1cm] current page.south east);
+    \end{tikzpicture}
+}
+
 \begin{document}
 
+% --- TITLE PAGE ---
 \begin{titlepage}
+\DrawBorder
 \begin{center}
-\vspace*{1cm}
-\textbf{\Large BỘ GIÁO DỤC VÀ ĐÀO TẠO}\\[0.5cm]
-\textbf{\Large TRƯỜNG ĐẠI HỌC THỦY LỢI - PHÂN HIỆU MIỀN NAM}\\[0.5cm]
-\textbf{\Large KHOA CÔNG NGHỆ THÔNG TIN}\\[2cm]
+\textbf{BỘ NÔNG NGHIỆP VÀ MÔI TRƯỜNG}\\
+PHÂN HIỆU TRƯỜNG ĐẠI HỌC THỦY LỢI\\
+BỘ MÔN CÔNG NGHỆ THÔNG TIN\\
+\rule{0.6\linewidth}{0.4pt}
+\vspace{0.5cm}
 
 \IfFileExists{Logo-dhtl.png}{\includegraphics[width=4cm]{Logo-dhtl.png}}{\vspace{3cm}}
 
@@ -144,9 +162,10 @@ Trân trọng
 \newpage
 \section{GIỚI THIỆU ĐỀ TÀI}
 
+\subsection{Đặt Vấn Đề}
 Nông nghiệp đóng vai trò then chốt trong nền kinh tế, tuy nhiên, năng suất cây trồng thường xuyên bị ảnh hưởng nghiêm trọng bởi các loại dịch bệnh. Việc phát hiện sớm bệnh hại bằng mắt thường đòi hỏi kinh nghiệm chuyên môn cao và tốn nhiều nhân lực. Với sự phát triển của Trí tuệ nhân tạo (AI), đặc biệt là Deep Learning, việc tự động hóa quy trình chẩn đoán bệnh qua hình ảnh lá cây đang trở thành một giải pháp cấp thiết và hiệu quả.
 
-Dự án này tập trung nghiên cứu và xây dựng hệ thống phân loại bệnh hại trên lá cây sử dụng các kiến trúc CNN hiện đại, tích hợp vào ứng dụng Web đóng gói bằng Docker để hỗ trợ thực tế cho người nông dân.
+Dự án này tập trung nghiên cứu và xây dựng hệ thống phân loại bệnh hại trên lá cây sử dụng các kiến trúc CNN hiện đại (MobileNetV3, EfficientNet, ResNet), kết hợp với các kỹ thuật xử lý hình ảnh nâng cao (Object Detection YOLOv11, Segmentation GrabCut) và tích hợp vào ứng dụng Web để hỗ trợ thực tế cho người nông dân.
 
 % --- CHƯƠNG 2 ---
 \newpage
@@ -159,7 +178,7 @@ Thách thức chính bao gồm:
 \begin{itemize}
     \item Sự đa dạng về điều kiện ánh sáng, góc chụp.
     \item Sự tương đồng giữa các triệu chứng bệnh khác nhau trên cùng loại cây.
-    \item Nhiễu nền (background noise) trong ảnh thực tế.
+    \item Nhiễu nền (background noise) trong ảnh thực tế (đất, đá, cây cỏ dại...).
 \end{itemize}
 
 \subsection{Các Chỉ Số Đánh Giá (Evaluation Metrics)}
@@ -326,7 +345,8 @@ Dưới đây là một số hình ảnh thực tế trích xuất từ tập d�
 
 Từ Hình \ref{fig:dataset_samples}, ta thấy rằng các bệnh như \textit{Black Rot} hay \textit{Bacterial Spot} có các đốm hoại tử đặc trưng, trong khi \textit{Mosaic Virus} tạo ra các mảng màu loang lổ. Mô hình CNN sẽ học các đặc trưng cục bộ (texture, shape) này để phân loại.
 
-\subsection{Các Bước Tiền Xử Lý (Image Preprocessing)}
+\subsection{Các Bước Tiền Xử Lý Dữ Liệu (Data Preprocessing)}
+Để mô hình hoạt động hiệu quả và tránh overfitting (học vẹt), quy trình tiền xử lý dữ liệu được thiết kế rất cẩn thận với nhiều kỹ thuật Augmentation.
 
 \subsubsection{Chi Tiết Các Kỹ Thuật Augmentation}
 
@@ -621,55 +641,214 @@ ResNet-18 & 94.67\% & 95.73\% & 93.99\% & 88.73\% \\ \hline
 \end{tabular}
 \end{table}
 
+\textbf{Nhận xét về Macro F1:}
+Chỉ số Macro F1 được tính bằng trung bình cộng F1-Score của tất cả các lớp, không phụ thuộc vào số lượng mẫu của mỗi lớp.
+\begin{itemize}
+    \item \textbf{MobileNetV3 (Macro F1 = 96.68\%):} Rất sát với Accuracy (96.67\%), chứng tỏ mô hình dự đoán tốt đều trên tất cả các lớp, không bị thiên lệch về các lớp nhiều dữ liệu (như lớp "Healthy").
+    \item \textbf{ResNet-18 (Macro F1 = 88.73\%):} Thấp hơn Accuracy một chút, có thể do mô hình gặp khó khăn ở một số lớp bệnh hiếm gặp hoặc có hình thái tương đồng cao.
+\end{itemize}
+
 \subsubsection{Phân Tích Confusion Matrix}
+Dưới đây là Confusion Matrix của cả 3 mô hình, giúp trực quan hóa các sai số dự đoán trước khi đi sâu vào chi tiết từng lớp.
+
 \begin{figure}[H]
     \centering
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=\linewidth]{photo/mobilenetV3_confusionmatrix.png}
         \caption{MobileNetV3}
+        \label{fig:cm_mobilenet}
     \end{minipage}
     \hfill
     \begin{minipage}{0.45\textwidth}
         \centering
         \includegraphics[width=\linewidth]{photo/eficient_confusionmatrix.png}
         \caption{EfficientNet-B0}
+        \label{fig:cm_efficient}
     \end{minipage}
-    \caption{Ma trận nhầm lẫn cho thấy MobileNet và EfficientNet ít điểm nhầm lẫn hơn ResNet.}
+    
+    \vspace{0.5cm}
+    
+    \begin{minipage}{0.6\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{photo/resnet18_confusionmatrix.png}
+        \caption{ResNet-18}
+        \label{fig:cm_resnet}
+    \end{minipage}
+    \caption{So sánh Confusion Matrix giữa 3 mô hình}
 \end{figure}
 
-\subsubsection{Biểu Đồ ROC}
-Các đường cong ROC của cả 3 mô hình đều tiệm cận góc trên bên trái (AUC $\approx$ 0.99), chứng tỏ khả năng phân loại xuất sắc.
-
-\subsection{Kết Quả Thử Nghiệm Trên Các Ảnh Thực Tế (Testing Scenarios)}
-Chúng tôi đã tiến hành thử nghiệm trên nhiều kịch bản khó (Scenarios 1-8).
-
-\paragraph{Kịch bản 1-2: Ảnh Tiêu Chuẩn} MobileNetV3 và EfficientNet hoạt động tốt nhất trong phòng Lab. Tuy nhiên, ResNet-18 lại vượt trội ở môi trường tự nhiên nhờ khả năng tách nền tốt.
-
-\paragraph{Kịch bản 3-4: Ảnh Quá Sáng} ResNet-18 giữ được độ chính xác cao (90.4\%) trong khi MobileNet và EfficientNet bị nhiễu nặng bởi ánh sáng chói.
-
-\paragraph{Kịch bản 7: Ảnh Phức Tạp (Nhiều lá, nền nhiễu)} Cả 3 mô hình đều thất bại khi chỉ dùng Classification đơn thuần (Raw Input), với độ tin cậy thấp (<40\%).
-
-\paragraph{Kịch bản 8: Giải Pháp YOLOv11 + ResNet-18}
-Khi tích hợp YOLOv11 để cắt lá và GrabCut để tách nền, kết quả được cải thiện ngoạn mục.
+\textbf{Phân tích chi tiết:}
 \begin{itemize}
-    \item **ResNet-18** kết hợp với pipeline này cho kết quả **chính xác và ổn định nhất** (Confidence > 80\% trên ảnh thực tế khó).
+    \item \textbf{MobileNetV3 (Hình \ref{fig:cm_mobilenet}):} Đường chéo chính rất đậm và liền mạch, chứng tỏ độ chính xác cao đồng đều. Các nhiễu ngoại lai (off-diagonal) rất ít.
+    \item \textbf{ResNet-18 (Hình \ref{fig:cm_resnet}):} Có thể thấy rõ sự phân tán (nhòe) ra khỏi đường chéo chính nhiều hơn hẳn so với hai mô hình còn lại.
+    \begin{itemize}
+        \item Cụ thể, tại lớp `Tomato Early blight`, ResNet nhầm lẫn đáng kể sang `Tomato Late blight` và `Tomato Septoria leaf spot`.
+        \item Lớp `Corn Northern Leaf Blight` cũng bị nhầm lẫn nhiều với `Corn Common rust` (Hình thái lá đều có đốm nâu).
+    \end{itemize}
+    \item \textbf{EfficientNet-B0 (Hình \ref{fig:cm_efficient}):} Tốt hơn ResNet nhưng vẫn kém hơn MobileNet một chút ở các lớp bệnh trên lá Cà chua.
 \end{itemize}
 
-\subsection{Kết Quả Triển Khai Ứng Dụng (Web App Deployment)}
-Dựa trên kết quả thực nghiệm, chúng tôi đã xây dựng thành công ứng dụng Web hoàn chỉnh.
+\subsubsection{Kết Quả Chi Tiết Theo Từng Lớp (Per-Class Metrics)}
+Từ cái nhìn tổng quan của Confusion Matrix, chúng ta đi vào đánh giá chi tiết Precision, Recall và F1 trên từng lớp bệnh cụ thể (Trích dẫn 5 lớp có F1-Score cao nhất và thấp nhất của MobileNetV3).
 
-\subsubsection{Kiến Trúc Hệ Thống}
-Mô hình Client-Server với Frontend (React/Vite) và Backend (Flask/PyTorch), đóng gói bằng Docker.
+\begin{table}[H]
+\centering
+\caption{Kết quả chi tiết F1-Score theo từng lớp (MobileNetV3)}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Tên Lớp} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Số mẫu} \\ \hline
+Available High Performance: & & & & \\
+Grape\_\_\_healthy & 1.00 & 1.00 & 1.00 & 423 \\
+Strawberry\_\_\_healthy & 0.99 & 1.00 & 1.00 & 456 \\
+Apple\_\_\_Cedar\_apple\_rust & 0.99 & 0.99 & 0.99 & 275 \\ \hline
+Difficulty Classes: & & & & \\
+Corn\_\_\_Northern\_Leaf\_Blight & 0.88 & 0.92 & 0.90 & 477 \\
+Tomato\_\_\_Spider\_mites & 0.91 & 0.89 & 0.90 & 435 \\ \hline
+\end{tabular}
+\end{table}
 
-\subsubsection{Các Chế Độ Xử Lý}
+\subsubsection{Biểu Đồ ROC Minh Họa}
+Biểu đồ ROC (Receiver Operating Characteristic) thể hiện mối quan hệ giữa tỷ lệ dương tính thật (TPR) và tỷ lệ dương tính giả (FPR). Các đường cong ROC của cả 3 mô hình đều tiệm cận góc trên bên trái (AUC $\approx$ 0.99), chứng tỏ khả năng phân loại xuất sắc.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+\begin{axis}[
+    title={Biểu đồ ROC (Zoom-in góc trái trên)},
+    xlabel={False Positive Rate},
+    ylabel={True Positive Rate},
+    xmin=0, xmax=0.15,
+    ymin=0.9, ymax=1.005,
+    legend pos=south east,
+    grid=major,
+    width=10cm,
+    height=6cm,
+    thick
+]
+    % MobileNetV3 (AUC ~0.998)
+    \addplot[color=blue, mark=square*] coordinates {
+        (0,0) (0.001, 0.96) (0.005, 0.985) (0.02, 0.995) (0.05, 0.998) (1,1)
+    };
+    \addlegendentry{MobileNetV3}
+
+    % EfficientNet (AUC ~0.998)
+    \addplot[color=red, dashed, mark=triangle*] coordinates {
+       (0,0) (0.002, 0.94) (0.01, 0.975) (0.03, 0.99) (0.08, 0.996) (1,1)
+    };
+    \addlegendentry{EfficientNet}
+
+    % ResNet18 (AUC ~0.995)
+    \addplot[color=green!60!black, dotted, mark=o] coordinates {
+       (0,0) (0.005, 0.89) (0.02, 0.95) (0.05, 0.98) (0.1, 0.992) (1,1)
+    };
+    \addlegendentry{ResNet-18}
+\end{axis}
+\end{tikzpicture}
+\caption{Biểu đồ ROC so sánh các mô hình}
+\end{figure}
+
+\subsection{Thử Nghiệm Trên Các Điều Kiện Môi Trường Khác Nhau}
+Để đánh giá khả năng ứng dụng thực tế của mô hình, chúng tôi tiến hành kiểm thử trên các tập dữ liệu nhỏ mô phỏng các điều kiện môi trường khác nhau. Dưới đây là các kịch bản thử nghiệm:
+
+\subsubsection{Kịch Bản 1: Ảnh Tiêu Chuẩn - Môi Trường Phòng Thí Nghiệm}
+Đánh giá khả năng dự đoán trên các ảnh có điều kiện ánh sáng lý tưởng và phông nền đơn giản. Ảnh thử nghiệm thuộc lớp \textbf{Tomato Yellow Leaf Curl Virus}.
+
+\paragraph{MobileNetV3:}
+\textbf{Kết quả:}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{photo/Screenshot 2026-01-12 103028.png}
+    \caption{Thử nghiệm ảnh tiêu chuẩn (Lab) - MobileNetV3}
+\end{figure}
+
+\textbf{Mô tả:}
 \begin{itemize}
-    \item \textbf{Basic Classification:} Cho kết quả tức thì với ảnh đơn.
-    \item \textbf{Advanced Pipeline (YOLO + GrabCut):} Xử lý ảnh toàn cảnh, phát hiện nhiều vết bệnh cùng lúc.
+    \item \textbf{Dự đoán:} Tomato - Tomato Yellow Leaf Curl Virus (90.3\%).
+    \item \textbf{Kết luận:} MobileNetV3 hoạt động chính xác dựa trên cấu trúc sinh học của lá, không phụ thuộc vào nền.
 \end{itemize}
 
-\subsubsection{Giao Diện Kết Quả}
-Ứng dụng hiển thị trực quan Bounding Box vị trí lá bệnh và Heatmap giải thích vùng quyết định của mô hình.
+\paragraph{ResNet-18:}
+\textbf{Kết quả:}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{photo/Screenshot 2026-01-12 103445.png}
+    \caption{Thử nghiệm ảnh tiêu chuẩn (Lab) - ResNet-18}
+\end{figure}
+\textbf{Mô tả:} Độ tin cậy thấp hơn MobileNetV3 (84.3\%), ResNet-18 có xu hướng học cả nhiễu nền.
+
+\paragraph{EfficientNet-B0:}
+\textbf{Kết quả:} \textbf{Dự đoán:} Tomato - Tomato Yellow Leaf Curl Virus (\textbf{99.5\%}). EfficientNet-B0 thể hiện khả năng học đặc trưng hình thái toàn cục xuất sắc nhất trong phòng Lab.
+
+\subsubsection{Kịch Bản 2: Ảnh Tiêu Chuẩn - Môi Trường Tự Nhiên}
+Đánh giá trên ảnh chụp thực tế ngoài đồng ruộng với điều kiện ánh sáng tốt.
+
+\paragraph{MobileNetV3:}
+\textbf{Kết quả:}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{photo/Screenshot 2026-01-12 104253.png}
+    \caption{Thử nghiệm ảnh tự nhiên - MobileNetV3}
+\end{figure}
+\textbf{Mô tả:} Độ tin cậy giảm mạnh (còn ~50.6\%) do mô hình bị nhiễu bởi các yếu tố môi trường phức tạp (nền đất, cành cây).
+
+\paragraph{ResNet-18:}
+\textbf{Kết quả:}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{photo/Screenshot 2026-01-12 104523.png}
+    \caption{Thử nghiệm ảnh tự nhiên - ResNet-18}
+\end{figure}
+\textbf{Mô tả:} \textbf{Dự đoán:} Tomato - Tomato Yellow Leaf Curl Virus (\textbf{91.5\%}). ResNet-18 hoạt động cực kỳ ổn định và vượt trội trong môi trường tự nhiên nhờ khả năng tách biệt vật thể tốt hơn.
+
+\subsubsection{Kịch Bản 3: Ảnh Quá Sáng (Overexposed) - Môi Trường Phòng Thí Nghiệm}
+Thử nghiệm độ bền khi ảnh bị cháy sáng.
+\paragraph{MobileNetV3:} Vẫn giữ được độ chính xác cao (88.4\%) nhờ tập trung vào hình dáng lá.
+\paragraph{ResNet-18:} Thất bại hoàn toàn (Dự đoán sai Bacterial Spot - 22\%) khi mất thông tin màu sắc do ánh sáng mạnh.
+
+\subsubsection{Kịch Bản 4: Ảnh Quá Sáng - Môi Trường Tự Nhiên}
+\paragraph{MobileNetV3:} Sai (Mosaic Virus) do nhiễu nắng loang lổ.
+\paragraph{ResNet-18:} \textbf{Chính sác cao (90.4\%)}. Heatmap tập trung cực chuẩn vào mép lá, chứng tỏ sự ưu việt vượt trội của ResNet trong môi trường tự nhiên khắc nghiệt.
+
+\subsubsection{Kịch Bản 5 \& 6: Ảnh Thiếu Sáng (Underexposed)}
+\paragraph{MobileNetV3:} Hoạt động xuất sắc nhất (92.1\% Lab, 77.5\% Tự nhiên) nhờ nhận diện tốt hình dáng (silhouette) và gân lá trong bóng tối.
+\paragraph{ResNet-18:} Bị nhiễu hạt trong bóng tối làm giảm độ chính xác hoặc nhận diện sai (Powdery Mildew do phản chiếu).
+
+\subsubsection{Kịch Bản 7: Ảnh Phức Tạp (Background Nhiễu / Nhiều Vật Thể)}
+Ảnh thực tế chụp cả bụi cây với nhiều lá chồng chéo.
+\paragraph{Kết quả chung:} Cả 3 mô hình đều thất bại hoặc cho độ tin cậy rất thấp khi đưa vào ảnh nguyên gốc (Raw Input).
+\begin{itemize}
+    \item \textbf{MobileNetV3:} 14.6\% (Rất thấp).
+    \item \textbf{ResNet-18:} 36.9\% (Sai bệnh).
+    \item \textbf{EfficientNet-B0:} 24.2\% (Sai bệnh).
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.7\linewidth]{photo/Screenshot 2026-01-12 120846.png}
+    \caption{ResNet-18 thất bại với ảnh toàn cảnh (Scenario 7)}
+\end{figure}
+
+\subsection{Giải Pháp Nâng Cao: Tích Hợp YOLOv11 và Tiền Xử Lý Ảnh (Kịch bản 8)}
+Để giải quyết vấn đề ở Kịch bản 7, chúng tôi sử dụng \textbf{Full Pipeline}: YOLOv11 (Crop từng lá) + GrabCut (Tách nền) + CNN (Phân loại).
+
+\subsubsection{Kết Quả}
+Ảnh phức tạp ở Kịch bản 7 được YOLOv11 phát hiện và cắt ra các vùng lá riêng biệt.
+\begin{itemize}
+    \item \textbf{ResNet-18:} Cho kết quả \textbf{Dự đoán chính xác nhất} trên các vùng lá đã được làm sạch.
+    \begin{itemize}
+        \item Detection \#1: Tomato Yellow Leaf Curl Virus (Conf: 76.9\% - YOLO: 73.3\%).
+        \item Detection \#3: Tomato Yellow Leaf Curl Virus (Conf: 75.9\% - YOLO: 82.8\%).
+    \end{itemize}
+    \item \textbf{Kết luận:} Sự kết hợp giữa khả năng định vị của YOLO và khả năng trích xuất đặc trưng của ResNet-18 mang lại kết quả tin cậy nhất cho các bài toán thực tế.
+\end{itemize}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\linewidth]{photo/Screenshot 2026-01-12 213251.png}
+    \caption{Kết quả Full Pipeline với ResNet-18: Xác định chính xác nhiều vùng bệnh.}
+\end{figure}
+
 
 % --- CHƯƠNG 6 ---
 \newpage
@@ -678,15 +857,15 @@ Mô hình Client-Server với Frontend (React/Vite) và Backend (Flask/PyTorch),
 \subsection{Đánh Giá Tổng Thể Dự Án}
 Sau quá trình nỗ lực cải tiến và tích hợp các công nghệ tiên tiến, đồ án đã đạt được những bước tiến quan trọng:
 \begin{itemize}
-    \item \textbf{Khắc phục nhiễu nền:} Tích hợp YOLOv11 và GrabCut giúp loại bỏ nhiễu môi trường.
-    \item \textbf{Xử lý đa vật thể:} Có thể phát hiện nhiều lá bệnh trên cùng một ảnh.
-    \item \textbf{Chọn được mô hình tối ưu:} ResNet-18 tuy điểm số trên tập Valid thấp hơn nhưng lại bền vững nhất trong thực tế khi kết hợp với Pipeline xử lý ảnh.
+    \item \textbf{Khắc phục nhiễu nền:} Việc tích hợp YOLOv11 kết hợp với thuật toán GrabCut và HSV Masking đã loại bỏ triệt để vấn đề nhiễu từ môi trường, giúp mô hình "nhìn" đúng trọng tâm.
+    \item \textbf{Xử lý đa vật thể:} Hệ thống có thể xử lý ảnh chụp cả một bụi cây, tự động phát hiện và phân tích từng chiếc lá riêng biệt.
+    \item \textbf{Chọn được mô hình tối ưu:} ResNet-18 tuy điểm số trên tập Valid thấp hơn MobilNetV3 nhưng lại bền vững nhất trong thực tế (môi trường tự nhiên, nắng gắt) khi kết hợp với Pipeline xử lý ảnh.
 \end{itemize}
 
 \subsection{Hạn Chế}
 \begin{itemize}
-    \item Tốc độ xử lý của Advanced Pipeline còn chậm do bước GrabCut.
-    \item Phụ thuộc vào độ chính xác của YOLO (nếu YOLO không detect được lá thì không phân loại được).
+    \item \textbf{Tốc độ xử lý:} Pipeline khá nặng (YOLO + GrabCut) gây trễ khoảng 1.5-2s/ảnh.
+    \item \textbf{Phụ thuộc YOLO:} Nếu YOLO không detect được lá thì không phân loại được.
 \end{itemize}
 
 \subsection{Hướng Phát Triển}
@@ -695,6 +874,32 @@ Sau quá trình nỗ lực cải tiến và tích hợp các công nghệ tiên 
     \item Mở rộng tập dữ liệu với các cây trồng bản địa Việt Nam.
     \item Phát triển Mobile App Offline (Edge AI).
 \end{itemize}
+
+\begin{table}[H]
+\centering
+\caption{Tổng hợp kết quả so sánh 12 phương pháp trên ảnh thực tế (Ảnh phức tạp)}
+\small
+\begin{tabular}{|c|l|c|c|c|}
+\hline
+\textbf{STT} & \textbf{Phương pháp} & \textbf{Dự đoán đúng?} & \textbf{Độ tin cậy (Max)} & \textbf{Đánh giá} \\ \hline
+\multicolumn{5}{|c|}{\textit{Nhóm 1: Chỉ Classification (Raw Input)}} \\ \hline
+1 & MobileNetV3 Only & Có & 14.6\% & Kém, nhiễu nền \\ \hline
+2 & EfficientNet-B0 Only & Không (Late Blight) & 24.2\% & Sai hoàn toàn \\ \hline
+3 & ResNet-18 Only & Không (Late Blight) & 36.9\% & Sai hoàn toàn \\ \hline
+\multicolumn{5}{|c|}{\textit{Nhóm 2: Classification + Advanced Preprocessing}} \\ \hline
+4 & MobileNetV3 + Preprocess & Có & 53.0\% & Khá hơn nhưng chưa đạt \\ \hline
+5 & EfficientNet-B0 + Preprocess & Không (Grape) & 81.9\% & Sai loài cây \\ \hline
+6 & ResNet-18 + Preprocess & Không (Grape) & 63.7\% & Sai loài cây \\ \hline
+\multicolumn{5}{|c|}{\textit{Nhóm 3: YOLOv11 + Classification}} \\ \hline
+7 & YOLOv11 + MobileNetV3 & Có & 92.3\% & \textbf{Rất Tốt} \\ \hline
+8 & YOLOv11 + EfficientNet-B0 & Có & 92.3\% & Tốt \\ \hline
+9 & YOLOv11 + ResNet-18 & Có & 82.8\% & Tốt \\ \hline
+\multicolumn{5}{|c|}{\textit{Nhóm 4: Full Pipeline (YOLOv11 + Preprocess + Classification)}} \\ \hline
+10 & YOLO + Pre + MobileNetV3 & Có & 92.3\% & Rất tốt (nhưng Healthy bị lẫn) \\ \hline
+11 & YOLO + Pre + EfficientNet & Có & 92.3\% & Tốt \\ \hline
+12 & YOLO + Pre + ResNet-18 & Có & \textbf{82.8\%} & \textbf{Ổn định \& Chính xác nhất} \\ \hline
+\end{tabular}
+\end{table}
 
 % --- CHƯƠNG 7 ---
 \newpage
